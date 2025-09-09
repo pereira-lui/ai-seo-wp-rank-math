@@ -4,7 +4,7 @@ Plugin Name: AI SEO Assistant for Rank Math
 Plugin URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
 Update URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
 Description: Analisa a página (HTML renderizada) e preenche automaticamente os campos do Rank Math SEO usando OpenAI. Inclui um metabox no editor para Analisar & Preencher.
-Version: 1.0.6
+Version: 1.0.7
 Author: ChatGPT (Head MKT helper)
 License: GPLv2 or later
 GitHub Plugin URI: pereira-lui/ai-seo-wp-rank-math
@@ -27,14 +27,25 @@ function ai_seo_rm_normalize_key($key){
         $key = substr($key, 1, -1);
     }
     if (strpos($key, 'sk-') !== false) {
-        if (preg_match('/(sk-[A-Za-z0-9_\-\.]+)/', $key, $m)) { $key = $m[1]; }
-        else { $pos = strpos($key, 'sk-'); $tail = substr($key, $pos); $parts = preg_split('/\s/', $tail); $key = $parts[0]; }
+        if (preg_match('/(sk-[A-Za-z0-9_\-\.]+)/', $key, $m)) {
+            $key = $m[1];
+        } else {
+            $pos = strpos($key, 'sk-');
+            $tail = substr($key, $pos);
+            $parts = preg_split('/\s/', $tail);
+            $key = $parts[0];
+        }
     }
-    if (stripos($key, 'Bearer ') === 0) { $key = trim(substr($key, 7)); }
+    if (stripos($key, 'Bearer ') === 0) {
+        $key = trim(substr($key, 7));
+    }
     return $key;
 }
 
-function ai_seo_rm_get_api_key() { $raw = ai_seo_rm_raw_key(); return ai_seo_rm_normalize_key($raw); }
+function ai_seo_rm_get_api_key() {
+    $raw = ai_seo_rm_raw_key();
+    return ai_seo_rm_normalize_key($raw);
+}
 
 function ai_seo_rm_mask_key($key){
     if (!$key) return '';
@@ -72,7 +83,13 @@ function ai_seo_rm_extract_json($text){
 
 // ------- Settings Page -------
 add_action('admin_menu', function() {
-    add_options_page('AI SEO (Rank Math)','AI SEO (Rank Math)','manage_options','ai-seo-rankmath','ai_seo_rm_settings_page');
+    add_options_page(
+        'AI SEO (Rank Math)',
+        'AI SEO (Rank Math)',
+        'manage_options',
+        'ai-seo-rankmath',
+        'ai_seo_rm_settings_page'
+    );
 });
 
 function ai_seo_rm_settings_page() {
@@ -80,15 +97,21 @@ function ai_seo_rm_settings_page() {
 
     if (isset($_POST['ai_seo_rm_api_key']) && check_admin_referer('ai_seo_rm_save_settings')) {
         update_option('ai_seo_rm_api_key', sanitize_text_field($_POST['ai_seo_rm_api_key']));
-        echo '<div class="updated"><p>Chave salva.</p></div>';
+        if (isset($_POST['ai_seo_rm_seo_brief'])) {
+            update_option('ai_seo_rm_seo_brief', sanitize_textarea_field($_POST['ai_seo_rm_seo_brief']));
+        }
+        echo '<div class="updated"><p>Configurações salvas.</p></div>';
     }
     $raw_key  = ai_seo_rm_raw_key();
-    $active   = ai_seo_rm_get_api_key();
+    $active   = ai_seo_rm_get_api_key(); // normalizada
     $src      = ai_seo_rm_key_source();
     $mask     = ai_seo_rm_mask_key($active);
     $using_const = $src === 'constant';
     $hint = '';
-    if ($raw_key && $raw_key !== $active) { $hint = 'Detectamos texto extra na chave; usando token extraído automaticamente.'; }
+    if ($raw_key && $raw_key !== $active) {
+        $hint = 'Detectamos texto extra na chave; usando token extraído automaticamente.';
+    }
+    $seo_brief = get_option('ai_seo_rm_seo_brief', '');
     ?>
     <div class="wrap">
         <h1>AI SEO Assistant (Rank Math)</h1>
@@ -105,6 +128,13 @@ function ai_seo_rm_settings_page() {
                     <td>
                         <input type="password" id="ai_seo_rm_api_key" name="ai_seo_rm_api_key" class="regular-text" value="<?php echo esc_attr(get_option('ai_seo_rm_api_key','')); ?>" placeholder="sk-...">
                         <p class="description">Cole apenas o token. O plugin extrai automaticamente o primeiro <code>sk-...</code> se vier com texto extra.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="ai_seo_rm_seo_brief">Brief/Contexto inicial de SEO</label></th>
+                    <td>
+                        <textarea id="ai_seo_rm_seo_brief" name="ai_seo_rm_seo_brief" class="large-text" rows="4" placeholder="Descreva um foco inicial para o SEO"><?php echo esc_textarea($seo_brief); ?></textarea>
+                        <p class="description">Texto que guia a IA em todas as páginas. Use para definir foco de nicho, localização, tom de voz e termos essenciais.</p>
                     </td>
                 </tr>
             </table>
@@ -124,17 +154,30 @@ add_action('wp_ajax_ai_seo_rm_test_key', function(){
     check_ajax_referer('ai_seo_rm_ajax', 'nonce');
     $key = ai_seo_rm_get_api_key();
     if (!$key) wp_send_json_error(['message'=>'Nenhuma chave configurada.']);
-    $resp = wp_remote_get('https://api.openai.com/v1/models', ['headers'=>['Authorization' => 'Bearer '.$key],'timeout'=>20]);
-    if (is_wp_error($resp)) { wp_send_json_error(['message'=>'Erro: '.$resp->get_error_message()]); }
+
+    $resp = wp_remote_get('https://api.openai.com/v1/models', [
+        'headers'=>['Authorization' => 'Bearer '.$key],
+        'timeout'=>20
+    ]);
+    if (is_wp_error($resp)) {
+        wp_send_json_error(['message'=>'Erro: '.$resp->get_error_message()]);
+    }
     $code = wp_remote_retrieve_response_code($resp);
     $body = wp_remote_retrieve_body($resp);
-    if ($code === 200) { wp_send_json_success(['message'=>'Chave válida ✅']); }
-    else { $data = json_decode($body, true); $err = isset($data['error']['message']) ? $data['error']['message'] : 'HTTP '.$code; wp_send_json_error(['message'=>'Falha ❌: '.$err, 'http_code'=>$code, 'preview'=>mb_substr($body,0,500)]); }
+    if ($code === 200) {
+        wp_send_json_success(['message'=>'Chave válida ✅']);
+    } else {
+        $data = json_decode($body, true);
+        $err  = isset($data['error']['message']) ? $data['error']['message'] : 'HTTP '.$code;
+        wp_send_json_error(['message'=>'Falha ❌: '.$err, 'http_code'=>$code, 'preview'=>mb_substr($body,0,500)]);
+    }
 });
 
 // ------- Metabox -------
 add_action('add_meta_boxes', function() {
-    foreach (['post','page'] as $scr) { add_meta_box('ai_seo_rm_box','AI SEO (Rank Math)','ai_seo_rm_metabox_cb',$scr,'side','high'); }
+    foreach (['post','page'] as $scr) {
+        add_meta_box('ai_seo_rm_box','AI SEO (Rank Math)','ai_seo_rm_metabox_cb',$scr,'side','high');
+    }
 });
 
 function ai_seo_rm_metabox_cb($post) {
@@ -142,7 +185,7 @@ function ai_seo_rm_metabox_cb($post) {
     $auto = get_post_meta($post->ID, '_ai_seo_rm_auto_apply', true);
     ?>
     <div id="ai-seo-rm-box">
-        <p>Este assistente analisa a <strong>página renderizada</strong> e preenche o Rank Math SEO (Title, Description, Focus Keyword) quando estiverem vazios.</p>
+        <p>Analisa a <strong>página renderizada</strong> e preenche Rank Math (Title, Description, Focus) quando vazios.</p>
         <p><label><input type="checkbox" id="ai-seo-rm-auto" <?php checked($auto, '1'); ?>/> Aplicar automaticamente</label></p>
         <p><button type="button" class="button button-primary" id="ai-seo-rm-run">Analisar página e preencher</button></p>
         <div id="ai-seo-rm-result" style="margin-top:10px; max-height:220px; overflow:auto; background:#fff; border:1px solid #ccd0d4; padding:8px;"></div>
@@ -162,12 +205,36 @@ add_action('save_post', function($post_id){
 // Enqueue JS
 add_action('admin_enqueue_scripts', function($hook){
     if (!in_array($hook, ['settings_page_ai-seo-rankmath','post.php','post-new.php'])) return;
-    wp_enqueue_script('ai-seo-rm-js', plugin_dir_url(__FILE__).'admin.js', ['jquery'], '1.0.6', true);
+    wp_enqueue_script('ai-seo-rm-js', plugin_dir_url(__FILE__).'admin.js', ['jquery'], '1.0.7', true);
     wp_localize_script('ai-seo-rm-js', 'AISEO_RM', [
         'ajaxurl' => admin_url('admin-ajax.php'),
         'nonce'   => wp_create_nonce('ai_seo_rm_ajax'),
     ]);
 });
+
+// ------- Build prompt helper (inject brief) -------
+function ai_seo_rm_build_prompt($analysis, $text_content){
+    $locale = get_locale(); $locale = $locale ? $locale : 'pt_BR';
+    $brief  = trim(get_option('ai_seo_rm_seo_brief',''));
+
+    $rules = "Regras:\n".
+             "- Use PT-BR natural e termos do nicho.\n".
+             "- Retorne SOMENTE JSON.\n".
+             "- title <= 60 chars (claro e clicável); description <= 160 chars (com CTA).\n".
+             "- Crie slug em kebab-case curto (acentos removidos).\n".
+             "- Use foco global quando fizer sentido; não force local se a página for institucional/global.\n";
+
+    $prompt  = "";
+    if ($brief) {
+        $prompt .= "Brief/Contexto global do site (seguir sempre que fizer sentido): ".$brief."\n\n";
+    }
+    $prompt .= "Atue como especialista de SEO para WordPress (Rank Math) em {$locale}.\n".
+               "Analise o resumo técnico e gere JSON com: focus_keyword, title, description, slug, og_title (opc), og_description (opc), suggestions.\n\n".
+               "Resumo técnico:\n". json_encode($analysis, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) ."\n\n".
+               "Texto base (HTML removido):\n\"\"\"\n{$text_content}\n\"\"\"\n\n".$rules;
+
+    return $prompt;
+}
 
 // ------- AJAX Handler (analyze/fill) -------
 add_action('wp_ajax_ai_seo_rm_analyze_fill', function(){
@@ -196,9 +263,8 @@ add_action('wp_ajax_ai_seo_rm_analyze_fill', function(){
 
     $text_content = wp_strip_all_tags($html);
     if (mb_strlen($text_content) > 7000) $text_content = mb_substr($text_content, 0, 7000);
-    $locale = get_locale(); $locale = $locale ? $locale : 'pt_BR';
 
-    $prompt_user = "Atue como especialista de SEO para WordPress (Rank Math) em {$locale}.\nAnalise este resumo e gere JSON com: focus_keyword, title (<=60), description (<=160), slug, og_title (opc), og_description (opc), suggestions.\nResumo: ". json_encode($analysis, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT) ."\nTexto:\"\"\"{$text_content}\"\"\"\nRegras: PT-BR natural; retorne SOMENTE JSON.";
+    $prompt_user = ai_seo_rm_build_prompt($analysis, $text_content);
 
     $body = [
         'model' => 'gpt-4o-mini',
@@ -283,7 +349,7 @@ add_action('wp_ajax_ai_seo_rm_analyze_fill', function(){
     ]);
 });
 
-// Auto-apply on publish/update if flagged
+// ------- Auto-apply on publish/update if flagged -------
 add_action('save_post', function($post_id, $post){
     if (wp_is_post_revision($post_id)) return;
     $auto = get_post_meta($post_id, '_ai_seo_rm_auto_apply', true);
@@ -305,9 +371,8 @@ add_action('save_post', function($post_id, $post){
     $analysis = ai_seo_rm_analyze_html($html, $post_id);
     $text_content = wp_strip_all_tags($html);
     if (mb_strlen($text_content) > 7000) $text_content = mb_substr($text_content, 0, 7000);
-    $locale = get_locale(); $locale = $locale ? $locale : 'pt_BR';
 
-    $prompt_user = "Atue como especialista de SEO para WordPress (Rank Math) em {$locale}. Gere JSON com: focus_keyword, title, description, slug. Resumo: ". json_encode($analysis, JSON_UNESCAPED_UNICODE) ." Texto: \"\"\"{$text_content}\"\"\" Responda SOMENTE JSON.";
+    $prompt_user = ai_seo_rm_build_prompt($analysis, $text_content);
 
     $body = [
         'model' => 'gpt-4o-mini',
@@ -316,7 +381,7 @@ add_action('save_post', function($post_id, $post){
             ['role'=>'user','content'=>$prompt_user]
         ],
         'temperature' => 0.2,
-        'max_tokens' => 400,
+        'max_tokens' => 450,
         'response_format' => ['type'=>'json_object']
     ];
     $resp = wp_remote_post('https://api.openai.com/v1/chat/completions', [
@@ -330,10 +395,13 @@ add_action('save_post', function($post_id, $post){
     $data = ai_seo_rm_extract_json($content);
     if (!is_array($data)) return;
 
-    if (!get_post_meta($post_id, 'rank_math_title', true) && !empty($data['title'])) {
+    $has_title = get_post_meta($post_id, 'rank_math_title', true);
+    $has_desc  = get_post_meta($post_id, 'rank_math_description', true);
+
+    if (!$has_title && !empty($data['title'])) {
         update_post_meta($post_id, 'rank_math_title', wp_strip_all_tags($data['title']));
     }
-    if (!get_post_meta($post_id, 'rank_math_description', true) && !empty($data['description'])) {
+    if (!$has_desc && !empty($data['description'])) {
         update_post_meta($post_id, 'rank_math_description', wp_strip_all_tags($data['description']));
     }
     if (!empty($data['focus_keyword'])) {
@@ -342,7 +410,7 @@ add_action('save_post', function($post_id, $post){
     }
 }, 20, 2);
 
-// Analyzer
+// ------- Analyzer -------
 function ai_seo_rm_analyze_html($html, $post_id=0){
     $report = [
         'post_id' => $post_id,
@@ -358,33 +426,62 @@ function ai_seo_rm_analyze_html($html, $post_id=0){
         'title_tag' => '',
         'meta_description' => ''
     ];
+
     if (preg_match('/<title>(.*?)<\/title>/is', $html, $m)) { $report['title_tag'] = wp_strip_all_tags($m[1]); }
     if (preg_match('/<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']/is', $html, $m2)) { $report['meta_description'] = wp_strip_all_tags($m2[1]); }
+
     $text = wp_strip_all_tags($html);
     $report['word_count'] = str_word_count($text, 0, 'ÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛáàâãéèêíìîóòôõúùûçÇ');
+    
     if (class_exists('DOMDocument')) {
         libxml_use_internal_errors(true);
         $dom = new DOMDocument();
         $loaded = $dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
         if ($loaded) {
             $xpath = new DOMXPath($dom);
-            $h1s = $xpath->query('//h1'); $report['h1_count'] = $h1s ? $h1s->length : 0;
-            $h2s = $xpath->query('//h2'); $report['h2_count'] = $h2s ? $h2s->length : 0;
-            $imgs = $xpath->query('//img'); $report['images_total'] = $imgs ? $imgs->length : 0;
-            $missing = 0; if ($imgs) { foreach ($imgs as $img) { $alt = $img->getAttribute('alt'); if ($alt === null || $alt === '') $missing++; } }
+            
+            $h1s = $xpath->query('//h1');
+            $report['h1_count'] = $h1s ? $h1s->length : 0;
+            
+            $h2s = $xpath->query('//h2');
+            $report['h2_count'] = $h2s ? $h2s->length : 0;
+
+            $imgs = $xpath->query('//img');
+            $report['images_total'] = $imgs ? $imgs->length : 0;
+            $missing = 0;
+            if ($imgs) {
+                foreach ($imgs as $img) {
+                    $alt = $img->getAttribute('alt');
+                    if ($alt === null || $alt === '') $missing++;
+                }
+            }
             $report['images_missing_alt'] = $missing;
-            $links = $xpath->query('//a[@href]'); $internal=0; $external=0; $home = home_url();
-            if ($links) { foreach ($links as $a) { $href = $a->getAttribute('href'); if (strpos($href, $home)===0 || (isset($href[0]) && $href[0]=='/')) $internal++; else $external++; } }
-            $report['links_internal'] = $internal; $report['links_external'] = $external;
-            $ldjson = $xpath->query('//script[@type="application/ld+json"]'); $report['has_ld_json'] = $ldjson && $ldjson->length > 0;
+
+            $links = $xpath->query('//a[@href]');
+            $internal = 0; $external = 0;
+            $home = home_url();
+            if ($links) {
+                foreach ($links as $a) {
+                    $href = $a->getAttribute('href');
+                    if (strpos($href, $home) === 0 || (isset($href[0]) && $href[0] == '/')) $internal++;
+                    else $external++;
+                }
+            }
+            $report['links_internal'] = $internal;
+            $report['links_external'] = $external;
+
+            $ldjson = $xpath->query('//script[@type="application/ld+json"]');
+            $report['has_ld_json'] = $ldjson && $ldjson->length > 0;
         }
         libxml_clear_errors();
     }
+
     $report['rank_math'] = [
         'title'       => $post_id ? get_post_meta($post_id, 'rank_math_title', true) : '',
         'description' => $post_id ? get_post_meta($post_id, 'rank_math_description', true) : '',
         'focus_kw'    => $post_id ? get_post_meta($post_id, 'rank_math_focus_keyword', true) : ''
     ];
+
     $tips = [];
     if ($report['h1_count'] != 1) $tips[] = 'Use exatamente um H1 por página.';
     if ($report['word_count'] < 300) $tips[] = 'Conteúdo curto: considere ampliar para >= 600 palavras.';
@@ -393,10 +490,11 @@ function ai_seo_rm_analyze_html($html, $post_id=0){
     if (empty($report['rank_math']['description'])) $tips[] = 'Rank Math Description vazio.';
     if (empty($report['rank_math']['focus_kw'])) $tips[] = 'Defina uma palavra-chave foco.';
     $report['quick_tips'] = $tips;
+
     return $report;
 }
 
-// Links GitHub na linha do plugin
+// --- Links GitHub na linha do plugin (pode editar para o seu repositório)
 add_filter('plugin_row_meta', function($links, $file){
     if (strpos($file, 'ai-seo-rankmath.php') !== false) {
         $links[] = '<a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" rel="noopener">GitHub</a>';
@@ -404,8 +502,3 @@ add_filter('plugin_row_meta', function($links, $file){
     }
     return $links;
 }, 10, 2);
-
-// (Opcional) Plugin Update Checker - exemplo
-// require __DIR__ . '/vendor/plugin-update-checker/plugin-update-checker.php';
-// $puc = Puc_v4_Factory::buildUpdateChecker('https://github.com/pereira-lui/ai-seo-wp-rank-math/', __FILE__, 'ai-seo-rankmath');
-// $puc->setBranch('main'); $api = $puc->getVcsApi(); if ($api) { $api->enableReleaseAssets(); }
