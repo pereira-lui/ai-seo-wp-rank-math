@@ -5,7 +5,7 @@ Plugin URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
 Update URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
 Description: Analisa a página (HTML renderizada) e preenche automaticamente os campos do Rank Math SEO usando OpenAI. Inclui um metabox no editor para Analisar & Preencher.
 Version: 1.0.7
-Author: ChatGPT (Head MKT helper)
+Author: Lui
 License: GPLv2 or later
 GitHub Plugin URI: pereira-lui/ai-seo-wp-rank-math
 Primary Branch: main
