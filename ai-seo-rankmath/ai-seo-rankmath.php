@@ -13,6 +13,14 @@ Primary Branch: main
 
 if (!defined('ABSPATH')) exit;
 
+// === Option B: Updater embutido (GitHub Releases) ============================
+require_once __DIR__ . '/vendor/mini-puc/mini-puc.php';
+// Inicializa o updater para este plugin (usa Releases do GitHub)
+// Observação: mantenha o asset ai-seo-rankmath.zip em cada Release.
+add_action('plugins_loaded', function(){
+    new MiniPUC_GitHubUpdater(__FILE__, 'ai-seo-rankmath', 'pereira-lui/ai-seo-wp-rank-math', 'main');
+});
+
 // ------- Helpers: API Key retrieval & normalization -------
 function ai_seo_rm_raw_key() {
     if (defined('OPENAI_API_KEY') && OPENAI_API_KEY) return OPENAI_API_KEY;
@@ -81,7 +89,7 @@ function ai_seo_rm_extract_json($text){
     return null;
 }
 
-// ------- Settings Page -------
+// ------- Settings Page (com brief de SEO) -------
 add_action('admin_menu', function() {
     add_options_page(
         'AI SEO (Rank Math)',
@@ -133,8 +141,8 @@ function ai_seo_rm_settings_page() {
                 <tr>
                     <th scope="row"><label for="ai_seo_rm_seo_brief">Brief/Contexto inicial de SEO</label></th>
                     <td>
-                        <textarea id="ai_seo_rm_seo_brief" name="ai_seo_rm_seo_brief" class="large-text" rows="4" placeholder="Descreva um foco inicial para o SEO"><?php echo esc_textarea($seo_brief); ?></textarea>
-                        <p class="description">Texto que guia a IA em todas as páginas. Use para definir foco de nicho, localização, tom de voz e termos essenciais.</p>
+                        <textarea id="ai_seo_rm_seo_brief" name="ai_seo_rm_seo_brief" class="large-text" rows="4" placeholder="Ex.: Foco: scooters elétricas em Passo Fundo, com atendimento no Brasil inteiro."><?php echo esc_textarea($seo_brief); ?></textarea>
+                        <p class="description">Guia global para títulos/descrições/palavra foco gerados pela IA.</p>
                     </td>
                 </tr>
             </table>
@@ -212,7 +220,7 @@ add_action('admin_enqueue_scripts', function($hook){
     ]);
 });
 
-// ------- Build prompt helper (inject brief) -------
+// ------- Prompt helper (injeta Brief) -------
 function ai_seo_rm_build_prompt($analysis, $text_content){
     $locale = get_locale(); $locale = $locale ? $locale : 'pt_BR';
     $brief  = trim(get_option('ai_seo_rm_seo_brief',''));
@@ -220,13 +228,12 @@ function ai_seo_rm_build_prompt($analysis, $text_content){
     $rules = "Regras:\n".
              "- Use PT-BR natural e termos do nicho.\n".
              "- Retorne SOMENTE JSON.\n".
-             "- title <= 60 chars (claro e clicável); description <= 160 chars (com CTA).\n".
-             "- Crie slug em kebab-case curto (acentos removidos).\n".
-             "- Use foco global quando fizer sentido; não force local se a página for institucional/global.\n";
+             "- title <= 60 chars; description <= 160 chars (com CTA).\n".
+             "- slug em kebab-case curto (sem acentos).\n";
 
     $prompt  = "";
     if ($brief) {
-        $prompt .= "Brief/Contexto global do site (seguir sempre que fizer sentido): ".$brief."\n\n";
+        $prompt .= "Brief/Contexto global do site (seguir quando fizer sentido): ".$brief."\n\n";
     }
     $prompt .= "Atue como especialista de SEO para WordPress (Rank Math) em {$locale}.\n".
                "Analise o resumo técnico e gere JSON com: focus_keyword, title, description, slug, og_title (opc), og_description (opc), suggestions.\n\n".
@@ -494,7 +501,7 @@ function ai_seo_rm_analyze_html($html, $post_id=0){
     return $report;
 }
 
-// --- Links GitHub na linha do plugin (pode editar para o seu repositório)
+// --- Links GitHub na linha do plugin
 add_filter('plugin_row_meta', function($links, $file){
     if (strpos($file, 'ai-seo-rankmath.php') !== false) {
         $links[] = '<a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" rel="noopener">GitHub</a>';

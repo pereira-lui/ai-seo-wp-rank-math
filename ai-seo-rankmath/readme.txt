@@ -9,5 +9,5 @@ License: GPLv2 or later
 Analisa o HTML renderizado de uma página e preenche automaticamente campos do Rank Math (title, description, focus keyword) usando OpenAI. Inclui metabox, teste de chave, normalização de API key e auto-aplicar.
 
 == 1.0.7 ==
-- **Novo:** campo de Configurações "Brief/Contexto inicial de SEO".
-- O brief é injetado no prompt para guiar títulos, descrições e foco.
+- Updater embutido (Option B): verifica Releases do GitHub e oferece atualização automática.
+- Campo de Brief/Contexto de SEO em Configurações.

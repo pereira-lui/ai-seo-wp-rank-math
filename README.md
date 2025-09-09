@@ -33,7 +33,7 @@ Analisa o **HTML renderizado** da página (ótimo para Elementor) e preenche aut
 - Marque **“Aplicar automaticamente”** para rodar na publicação/atualização.
 
 ## Releases automáticas
-Ao criar uma tag `v*` (ex.: `v1.0.6`), o GitHub Actions gera o ZIP automaticamente em **Releases** (workflow incluso em `.github/workflows/release.yml`).
+Ao criar uma tag `v*` (ex.: `v1.0.7`), o GitHub Actions gera o ZIP automaticamente em **Releases** (workflow incluso em `.github/workflows/release.yml`).
 
 ## Atualizações automáticas no WordPress
 Use **uma** das opções abaixo:
