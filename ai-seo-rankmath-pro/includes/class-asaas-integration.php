@@ -46,17 +46,18 @@ class AI_SEO_RM_Asaas_Integration {
             ? 'https://sandbox.asaas.com/api/v3/'
             : 'https://api.asaas.com/v3/';
         
-        // Planos disponíveis
+        // Planos disponíveis (todos pagamento único)
         $this->plans = [
             'monthly' => [
                 'id' => 'monthly',
                 'name' => 'Mensal',
                 'price' => 29.90,
-                'cycle' => 'MONTHLY',
-                'description' => 'Licença mensal do AI SEO Assistant',
+                'cycle' => null, // Pagamento único
+                'description' => 'Licença de 30 dias - AI SEO Assistant',
+                'days' => 30,
                 'features' => [
-                    'Uso ilimitado',
-                    'Atualizações automáticas',
+                    'Uso ilimitado por 30 dias',
+                    'Atualizações durante o período',
                     'Suporte por email',
                 ]
             ],
@@ -64,21 +65,23 @@ class AI_SEO_RM_Asaas_Integration {
                 'id' => 'yearly',
                 'name' => 'Anual',
                 'price' => 297.00,
-                'cycle' => 'YEARLY',
-                'description' => 'Licença anual do AI SEO Assistant (2 meses grátis)',
+                'cycle' => null, // Pagamento único
+                'description' => 'Licença de 1 ano - AI SEO Assistant',
+                'days' => 365,
                 'features' => [
-                    'Uso ilimitado',
-                    'Atualizações automáticas',
+                    'Uso ilimitado por 1 ano',
+                    'Atualizações durante o período',
                     'Suporte prioritário',
-                    '2 meses grátis',
+                    'Economia de 2 meses',
                 ]
             ],
             'lifetime' => [
                 'id' => 'lifetime',
                 'name' => 'Vitalício',
                 'price' => 497.00,
-                'cycle' => null,
-                'description' => 'Licença vitalícia do AI SEO Assistant',
+                'cycle' => null, // Pagamento único
+                'description' => 'Licença vitalícia - AI SEO Assistant',
+                'days' => 0, // 0 = sem expiração
                 'features' => [
                     'Uso ilimitado para sempre',
                     'Atualizações vitalícias',
@@ -211,49 +214,26 @@ class AI_SEO_RM_Asaas_Integration {
             return ['success' => false, 'error' => 'Plano inválido'];
         }
         
+        $license_key = $this->generate_license_key();
+        
         $payment_data = [
             'customer' => $customer_id,
             'billingType' => $billing_type, // BOLETO, CREDIT_CARD, PIX, UNDEFINED
             'value' => $plan['price'],
             'dueDate' => date('Y-m-d', strtotime('+3 days')),
             'description' => $plan['description'],
-            'externalReference' => $this->generate_license_key(),
+            'externalReference' => json_encode([
+                'license_key' => $license_key,
+                'plan_id' => $plan_id,
+                'days' => $plan['days'],
+            ]),
         ];
         
         $result = $this->api_request('payments', 'POST', $payment_data);
         
         if ($result['success']) {
             // Salva referência do pagamento
-            $this->save_pending_payment($result['data']);
-        }
-        
-        return $result;
-    }
-    
-    /**
-     * Cria uma assinatura recorrente
-     */
-    public function create_subscription($customer_id, $plan_id, $billing_type = 'UNDEFINED') {
-        $plan = $this->plans[$plan_id] ?? null;
-        
-        if (!$plan || !$plan['cycle']) {
-            return ['success' => false, 'error' => 'Plano inválido para assinatura'];
-        }
-        
-        $subscription_data = [
-            'customer' => $customer_id,
-            'billingType' => $billing_type,
-            'value' => $plan['price'],
-            'nextDueDate' => date('Y-m-d'),
-            'cycle' => $plan['cycle'], // MONTHLY, YEARLY
-            'description' => $plan['description'],
-            'externalReference' => $this->generate_license_key(),
-        ];
-        
-        $result = $this->api_request('subscriptions', 'POST', $subscription_data);
-        
-        if ($result['success']) {
-            $this->save_pending_payment($result['data']);
+            $this->save_pending_payment($result['data'], $plan);
         }
         
         return $result;
@@ -273,11 +253,15 @@ class AI_SEO_RM_Asaas_Integration {
     /**
      * Salva pagamento pendente
      */
-    private function save_pending_payment($payment_data) {
+    private function save_pending_payment($payment_data, $plan) {
+        $external_ref = json_decode($payment_data['externalReference'], true);
+        
         $pending = get_option('ai_seo_rm_pending_payments', []);
         $pending[$payment_data['id']] = [
             'id' => $payment_data['id'],
-            'license_key' => $payment_data['externalReference'],
+            'license_key' => $external_ref['license_key'],
+            'plan_id' => $external_ref['plan_id'],
+            'days' => $external_ref['days'],
             'status' => $payment_data['status'],
             'value' => $payment_data['value'],
             'created_at' => current_time('mysql'),
@@ -299,16 +283,24 @@ class AI_SEO_RM_Asaas_Integration {
         $payment = $pending[$payment_id];
         
         if (in_array($status, ['CONFIRMED', 'RECEIVED'])) {
-            // Ativa a licença
-            $license_manager = ai_seo_rm_license();
-            $license_manager->activate_license($payment['license_key']);
+            // Calcula data de expiração baseada nos dias do plano
+            $days = intval($payment['days']);
+            $expires = null;
             
-            // Salva dados do pagamento na licença
-            update_option('ai_seo_rm_license_payment', [
-                'payment_id' => $payment_id,
+            if ($days > 0) {
+                $expires = date('Y-m-d H:i:s', strtotime("+{$days} days"));
+            }
+            // Se days = 0, é vitalício (sem expiração)
+            
+            // Salva dados da licença ativada
+            update_option('ai_seo_rm_license_data', [
                 'license_key' => $payment['license_key'],
-                'value' => $payment['value'],
+                'status' => 'active',
+                'plan_id' => $payment['plan_id'],
                 'activated_at' => current_time('mysql'),
+                'expires_at' => $expires,
+                'payment_id' => $payment_id,
+                'value' => $payment['value'],
             ]);
             
             // Remove dos pendentes
@@ -405,23 +397,20 @@ class AI_SEO_RM_Asaas_Integration {
             wp_send_json_error(['message' => 'Plano inválido.']);
         }
         
-        if ($plan['cycle']) {
-            // Assinatura recorrente
-            $result = $this->create_subscription($customer['id'], $plan_id, $billing_type);
-        } else {
-            // Pagamento único (vitalício)
-            $result = $this->create_payment($customer['id'], $plan_id, $billing_type);
-        }
+        // Sempre pagamento único (não recorrente)
+        $result = $this->create_payment($customer['id'], $plan_id, $billing_type);
         
         if ($result['success']) {
             $payment_data = $result['data'];
+            $external_ref = json_decode($payment_data['externalReference'], true);
             
             $response = [
                 'message' => 'Cobrança criada com sucesso!',
                 'payment_id' => $payment_data['id'],
                 'status' => $payment_data['status'],
                 'value' => $payment_data['value'],
-                'license_key' => $payment_data['externalReference'],
+                'license_key' => $external_ref['license_key'],
+                'plan' => $plan['name'],
             ];
             
             // Adiciona links de pagamento

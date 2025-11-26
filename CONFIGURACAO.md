@@ -90,13 +90,15 @@ Para receber confirmações de pagamento automáticas:
 
 ---
 
-## 🏷️ Planos Configurados
+## 🏷️ Planos Configurados (Pagamento Único)
 
-| Plano | Preço | Tipo |
-|-------|-------|------|
-| Mensal | R$ 29,90/mês | Recorrente |
-| Anual | R$ 297,00/ano | Recorrente (2 meses grátis) |
-| Vitalício | R$ 497,00 | Pagamento único |
+| Plano | Preço | Validade |
+|-------|-------|----------|
+| Mensal | R$ 29,90 | 30 dias |
+| Anual | R$ 297,00 | 365 dias |
+| Vitalício | R$ 497,00 | Para sempre |
+
+**Todos são pagamentos únicos** - não há cobrança recorrente automática.
 
 Para alterar os preços, edite `class-asaas-integration.php` na seção `$this->plans`.
 
