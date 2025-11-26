@@ -22,14 +22,16 @@
 if (!defined('ABSPATH')) exit;
 
 // === Plugin Constants ========================================================
-define('AI_SEO_RM_VERSION', '2.0.0');
+define('AI_SEO_RM_VERSION', '2.1.0');
 define('AI_SEO_RM_PLUGIN_FILE', __FILE__);
 define('AI_SEO_RM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_SEO_RM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AI_SEO_RM_PLUGIN_BASENAME', plugin_basename(__FILE__));
 
-// === Load License Manager ====================================================
+// === Load Classes ============================================================
 require_once AI_SEO_RM_PLUGIN_DIR . 'includes/class-license-manager.php';
+require_once AI_SEO_RM_PLUGIN_DIR . 'includes/class-asaas-integration.php';
+require_once AI_SEO_RM_PLUGIN_DIR . 'includes/purchase-page.php';
 
 // === Updater embutido (GitHub Releases) ======================================
 require_once AI_SEO_RM_PLUGIN_DIR . 'vendor/mini-puc/mini-puc.php';
@@ -40,6 +42,9 @@ add_action('plugins_loaded', function(){
     
     // Inicializa o gerenciador de licenças
     ai_seo_rm_license();
+    
+    // Inicializa integração com Asaas
+    ai_seo_rm_asaas();
     
     // Load text domain para traduções
     load_plugin_textdomain('ai-seo-rankmath', false, dirname(AI_SEO_RM_PLUGIN_BASENAME) . '/languages');
@@ -115,6 +120,7 @@ function ai_seo_rm_extract_json($text){
 
 // ------- Settings Page (com brief de SEO e Licença) -------
 add_action('admin_menu', function() {
+    // Página principal de configurações
     add_options_page(
         'AI SEO (Rank Math)',
         'AI SEO (Rank Math)',
@@ -122,7 +128,23 @@ add_action('admin_menu', function() {
         'ai-seo-rankmath',
         'ai_seo_rm_settings_page'
     );
+    
+    // Subpágina de compra (aparece no menu também)
+    add_submenu_page(
+        'options-general.php',
+        'Comprar Licença - AI SEO',
+        '',  // Esconde do menu
+        'manage_options',
+        'ai-seo-rankmath-purchase',
+        'ai_seo_rm_purchase_page_wrapper'
+    );
 });
+
+function ai_seo_rm_purchase_page_wrapper() {
+    echo '<div class="wrap">';
+    ai_seo_rm_render_purchase_page();
+    echo '</div>';
+}
 
 function ai_seo_rm_settings_page() {
     if (!current_user_can('manage_options')) return;
@@ -199,6 +221,11 @@ function ai_seo_rm_settings_page() {
             <?php elseif ($license_info['is_trial']): ?>
                 <p style="color:#dba617; font-weight:bold;">⏳ Modo Trial - <?php echo $license_info['trial_days']; ?> dia(s) restante(s)</p>
                 <p>Você está usando o período de testes gratuito. Adquira uma licença para uso contínuo.</p>
+                <p style="margin-top:15px;">
+                    <a href="<?php echo admin_url('options-general.php?page=ai-seo-rankmath-purchase'); ?>" class="button button-primary">🛒 Comprar Licença</a>
+                </p>
+                <hr style="margin:20px 0;">
+                <p><strong>Já tem uma licença?</strong> Ative abaixo:</p>
                 <form method="post">
                     <?php wp_nonce_field('ai_seo_rm_license_action'); ?>
                     <table class="form-table">
@@ -211,10 +238,14 @@ function ai_seo_rm_settings_page() {
                         </tr>
                     </table>
                 </form>
-                <p><a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" class="button">🛒 Adquirir Licença</a></p>
             <?php else: ?>
                 <p style="color:#d63638; font-weight:bold;">❌ Licença Inativa - Período de trial expirado</p>
-                <p>Para continuar usando o plugin, ative uma licença válida.</p>
+                <p>Para continuar usando o plugin, adquira uma licença.</p>
+                <p style="margin-top:15px;">
+                    <a href="<?php echo admin_url('options-general.php?page=ai-seo-rankmath-purchase'); ?>" class="button button-primary button-hero">🛒 Comprar Licença Agora</a>
+                </p>
+                <hr style="margin:20px 0;">
+                <p><strong>Já tem uma licença?</strong> Ative abaixo:</p>
                 <form method="post">
                     <?php wp_nonce_field('ai_seo_rm_license_action'); ?>
                     <table class="form-table">
@@ -227,7 +258,6 @@ function ai_seo_rm_settings_page() {
                         </tr>
                     </table>
                 </form>
-                <p><a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" class="button">🛒 Adquirir Licença</a></p>
             <?php endif; ?>
         </div>
 

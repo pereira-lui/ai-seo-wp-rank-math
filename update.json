@@ -1,7 +1,7 @@
 {
   "name": "AI SEO Assistant for Rank Math",
   "slug": "ai-seo-rankmath",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "download_url": "https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/latest/download/ai-seo-rankmath.zip",
   "requires": "5.8",
   "tested": "6.6",

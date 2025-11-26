@@ -7,6 +7,21 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-11-26
+
+### Adicionado
+- 💳 Integração completa com Asaas para pagamentos
+- 📱 Suporte a PIX, Boleto e Cartão de Crédito
+- 🛒 Página de compra integrada no admin do WordPress
+- 🔄 Assinaturas recorrentes (mensal/anual)
+- 💰 Plano vitalício com pagamento único
+- 🪝 Webhook para ativação automática de licença após pagamento
+- 📊 3 planos: Mensal (R$29,90), Anual (R$297) e Vitalício (R$497)
+
+### Melhorado
+- Interface da página de configurações
+- Fluxo de ativação de licença
+
 ## [2.0.0] - 2025-11-26
 
 ### Adicionado
