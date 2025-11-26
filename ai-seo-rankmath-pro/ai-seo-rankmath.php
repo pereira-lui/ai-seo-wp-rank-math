@@ -1,10 +1,10 @@
 <?php
 /**
- * Plugin Name: AI SEO Assistant for Rank Math
+ * Plugin Name: AI SEO Assistant for Rank Math PRO
  * Plugin URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
  * Update URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
- * Description: Analisa a página (HTML renderizada) e preenche automaticamente os campos do Rank Math SEO usando OpenAI. Inclui um metabox no editor para Analisar & Preencher.
- * Version: 2.0.0
+ * Description: Preenche automaticamente os campos do Rank Math SEO usando Inteligência Artificial (ChatGPT). Versão PRO com todas as funcionalidades.
+ * Version: 2.1.0
  * Author: Lui
  * Author URI: https://github.com/pereira-lui
  * License: GPLv2 or later
@@ -16,7 +16,7 @@
  * GitHub Plugin URI: pereira-lui/ai-seo-wp-rank-math
  * Primary Branch: main
  * 
- * @package AI_SEO_RankMath
+ * @package AI_SEO_RankMath_Pro
  */
 
 if (!defined('ABSPATH')) exit;
@@ -27,6 +27,7 @@ define('AI_SEO_RM_PLUGIN_FILE', __FILE__);
 define('AI_SEO_RM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_SEO_RM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AI_SEO_RM_PLUGIN_BASENAME', plugin_basename(__FILE__));
+define('AI_SEO_RM_IS_PRO', true);
 
 // === Load Classes ============================================================
 require_once AI_SEO_RM_PLUGIN_DIR . 'includes/class-license-manager.php';
@@ -38,7 +39,7 @@ require_once AI_SEO_RM_PLUGIN_DIR . 'vendor/mini-puc/mini-puc.php';
 
 add_action('plugins_loaded', function(){
     // Inicializa o updater (usa Releases do GitHub)
-    new MiniPUC_GitHubUpdater(__FILE__, 'ai-seo-rankmath', 'pereira-lui/ai-seo-wp-rank-math', 'main');
+    new MiniPUC_GitHubUpdater(__FILE__, 'ai-seo-rankmath-pro', 'pereira-lui/ai-seo-wp-rank-math', 'main');
     
     // Inicializa o gerenciador de licenças
     ai_seo_rm_license();

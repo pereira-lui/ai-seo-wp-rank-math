@@ -20,31 +20,36 @@ jobs:
         id: get_version
         run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
 
-      - name: Create plugin ZIP
+      - name: Create FREE plugin ZIP
         run: |
-          cd ai-seo-rankmath
-          zip -r ../ai-seo-rankmath.zip . -x "*.git*" -x "*.DS_Store" -x "Thumbs.db"
+          cd ai-seo-rankmath-free
+          zip -r ../ai-seo-rankmath-free.zip . -x "*.git*" -x "*.DS_Store" -x "Thumbs.db"
+          cd ..
+
+      - name: Create PRO plugin ZIP
+        run: |
+          cd ai-seo-rankmath-pro
+          zip -r ../ai-seo-rankmath-pro.zip . -x "*.git*" -x "*.DS_Store" -x "Thumbs.db"
           cd ..
 
       - name: Generate changelog for release
         id: changelog
         run: |
-          # Extract changelog for current version
           VERSION=${{ steps.get_version.outputs.VERSION }}
           CHANGELOG=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
           
-          # If no specific changelog found, use generic message
           if [ -z "$CHANGELOG" ]; then
             CHANGELOG="Release version $VERSION"
           fi
           
-          # Save to file for release body
           echo "$CHANGELOG" > release_notes.md
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ai-seo-rankmath.zip
+          files: |
+            ai-seo-rankmath-free.zip
+            ai-seo-rankmath-pro.zip
           body_path: release_notes.md
           draft: false
           prerelease: false
@@ -57,16 +62,16 @@ jobs:
           VERSION=${{ steps.get_version.outputs.VERSION }}
           cat > update.json << EOF
           {
-            "name": "AI SEO Assistant for Rank Math",
-            "slug": "ai-seo-rankmath",
+            "name": "AI SEO Assistant for Rank Math PRO",
+            "slug": "ai-seo-rankmath-pro",
             "version": "$VERSION",
-            "download_url": "https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/download/v$VERSION/ai-seo-rankmath.zip",
+            "download_url": "https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/download/v$VERSION/ai-seo-rankmath-pro.zip",
             "requires": "5.8",
             "tested": "6.6",
             "requires_php": "7.4",
             "last_updated": "$(date -u +%Y-%m-%d)",
             "sections": {
-              "description": "Analisa a página e preenche automaticamente os campos do Rank Math SEO usando OpenAI.",
+              "description": "Preenche automaticamente os campos do Rank Math SEO usando ChatGPT. Versão PRO.",
               "changelog": "Veja o changelog completo em https://github.com/pereira-lui/ai-seo-wp-rank-math/blob/main/CHANGELOG.md"
             }
           }
