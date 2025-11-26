@@ -5,7 +5,7 @@ Tags: seo, rank math, analysis, optimization, ai
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 2.1.0
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -85,6 +85,11 @@ Acesse [nosso site](https://github.com/pereira-lui/ai-seo-wp-rank-math) para adq
 3. Página de configurações com comparativo Free vs PRO
 
 == Changelog ==
+
+= 2.3.0 =
+* Sistema de compra integrado dentro do WordPress
+* Pagamento via PIX, Boleto ou Cartão
+* Upgrade para PRO sem sair do painel
 
 = 2.1.0 =
 * Lançamento da versão FREE no WordPress.org

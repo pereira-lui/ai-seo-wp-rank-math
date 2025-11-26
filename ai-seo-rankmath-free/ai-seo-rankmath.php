@@ -19,12 +19,15 @@
 if (!defined('ABSPATH')) exit;
 
 // === Plugin Constants ========================================================
-define('AI_SEO_RM_VERSION', '2.1.0');
+define('AI_SEO_RM_VERSION', '2.3.0');
 define('AI_SEO_RM_PLUGIN_FILE', __FILE__);
 define('AI_SEO_RM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_SEO_RM_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('AI_SEO_RM_PLUGIN_BASENAME', plugin_basename(__FILE__));
 define('AI_SEO_RM_IS_PRO', false);
+
+// === Load Classes ============================================================
+require_once AI_SEO_RM_PLUGIN_DIR . 'includes/class-upgrade.php';
 
 // === Settings Page ===========================================================
 add_action('admin_menu', function() {
@@ -56,7 +59,7 @@ function ai_seo_rm_settings_page() {
                 <li>✅ Open Graph para redes sociais</li>
                 <li>✅ Suporte prioritário</li>
             </ul>
-            <a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" 
+            <a href="<?php echo admin_url('options-general.php?page=ai-seo-upgrade'); ?>" 
                style="display:inline-block; background:#fff; color:#667eea; padding:12px 25px; border-radius:6px; text-decoration:none; font-weight:bold;">
                 🛒 Adquirir Versão PRO
             </a>
@@ -175,7 +178,7 @@ function ai_seo_rm_metabox_cb($post) {
             <p style="margin:0 0 8px 0; font-size:12px; color:#1e3a5f;">
                 <strong>🚀 Quer preenchimento automático?</strong>
             </p>
-            <a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" 
+            <a href="<?php echo admin_url('options-general.php?page=ai-seo-upgrade'); ?>" 
                style="font-size:11px; color:#2271b1; text-decoration:none;">
                 Upgrade para PRO →
             </a>
@@ -381,14 +384,14 @@ function ai_seo_rm_analyze_html($html, $post_id = 0) {
 // === Plugin Links ============================================================
 add_filter('plugin_row_meta', function($links, $file) {
     if (strpos($file, 'ai-seo-rankmath.php') !== false) {
-        $links[] = '<a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" style="color:#2271b1; font-weight:bold;">🚀 Upgrade para PRO</a>';
+        $links[] = '<a href="' . admin_url('options-general.php?page=ai-seo-upgrade') . '" style="color:#2271b1; font-weight:bold;">🚀 Upgrade para PRO</a>';
     }
     return $links;
 }, 10, 2);
 
 add_filter('plugin_action_links_' . plugin_basename(__FILE__), function($links) {
     $settings_link = '<a href="' . admin_url('options-general.php?page=ai-seo-rankmath') . '">Configurações</a>';
-    $pro_link = '<a href="https://github.com/pereira-lui/ai-seo-wp-rank-math" target="_blank" style="color:#2271b1; font-weight:bold;">PRO</a>';
+    $pro_link = '<a href="' . admin_url('options-general.php?page=ai-seo-upgrade') . '" style="color:#2271b1; font-weight:bold;">PRO</a>';
     array_unshift($links, $settings_link, $pro_link);
     return $links;
 });
