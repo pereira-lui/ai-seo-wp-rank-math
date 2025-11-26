@@ -95,12 +95,21 @@ class AI_SEO_RM_Asaas_Integration {
     }
     
     /**
-     * Retorna a API Key do Asaas
+     * Retorna a API Key do Asaas (sua chave - não do cliente)
      */
     private function get_api_key() {
+        // IMPORTANTE: Esta é a SUA chave do Asaas para receber pagamentos
+        // Configure no wp-config.php do SEU site de vendas ou deixe hardcoded aqui
+        
+        // Opção 1: Via constante (recomendado para seu site de vendas)
         if (defined('AI_SEO_RM_ASAAS_API_KEY')) {
             return AI_SEO_RM_ASAAS_API_KEY;
         }
+        
+        // Opção 2: Hardcoded (substitua pela sua chave real)
+        // return '$aact_YourAsaasApiKeyHere';
+        
+        // Opção 3: Via option (para testes)
         return get_option('ai_seo_rm_asaas_api_key', '');
     }
     

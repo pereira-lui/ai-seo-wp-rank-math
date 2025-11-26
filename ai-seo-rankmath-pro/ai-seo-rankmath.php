@@ -4,7 +4,7 @@
  * Plugin URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
  * Update URI: https://github.com/pereira-lui/ai-seo-wp-rank-math
  * Description: Preenche automaticamente os campos do Rank Math SEO usando Inteligência Artificial (ChatGPT). Versão PRO com todas as funcionalidades.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Lui
  * Author URI: https://github.com/pereira-lui
  * License: GPLv2 or later
@@ -22,7 +22,7 @@
 if (!defined('ABSPATH')) exit;
 
 // === Plugin Constants ========================================================
-define('AI_SEO_RM_VERSION', '2.1.0');
+define('AI_SEO_RM_VERSION', '2.2.0');
 define('AI_SEO_RM_PLUGIN_FILE', __FILE__);
 define('AI_SEO_RM_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AI_SEO_RM_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -51,7 +51,9 @@ add_action('plugins_loaded', function(){
     load_plugin_textdomain('ai-seo-rankmath', false, dirname(AI_SEO_RM_PLUGIN_BASENAME) . '/languages');
 });
 
-// ------- Helpers: API Key retrieval & normalization -------
+// ------- Helpers: OpenAI API Key do CLIENTE (ele configura) -------
+// NOTA: Cada cliente precisa ter sua própria chave da OpenAI
+// Pode ser definida via wp-config.php ou nas configurações do plugin
 function ai_seo_rm_raw_key() {
     if (defined('OPENAI_API_KEY') && OPENAI_API_KEY) return OPENAI_API_KEY;
     return get_option('ai_seo_rm_api_key', '');
@@ -265,8 +267,9 @@ function ai_seo_rm_settings_page() {
         <?php if ($can_use): ?>
         <!-- API Settings Section -->
         <div style="background:#fff; border:1px solid #ccd0d4; padding:15px 20px; margin:20px 0;">
-            <h2 style="margin-top:0;">⚙️ Configurações da API</h2>
-            <p>Informe sua chave da OpenAI ou defina no wp-config.php como <code>define('OPENAI_API_KEY','sk-...');</code>.</p>
+            <h2 style="margin-top:0;">⚙️ Sua Chave da OpenAI</h2>
+            <p><strong>Importante:</strong> Você precisa ter sua própria conta na OpenAI para usar este plugin.</p>
+            <p>Obtenha sua chave em <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com/api-keys</a> e informe abaixo, ou defina no <code>wp-config.php</code> como <code>define('OPENAI_API_KEY','sk-...');</code>.</p>
             <p><strong>Fonte ativa:</strong> <?php echo esc_html(strtoupper($src)); ?><?php if($mask){ echo ' — <code>'.$mask.'</code>'; } ?><?php if($hint){ echo '<br><em style="color:#cc0000">'.$hint.'</em>'; } ?></p>
             <?php if ($using_const): ?>
                 <p style="color:#cc0000"><strong>Aviso:</strong> Como OPENAI_API_KEY está definida no <code>wp-config.php</code>, a chave abaixo (opção) será ignorada.</p>
