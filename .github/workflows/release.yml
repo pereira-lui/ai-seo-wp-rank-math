@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create plugin ZIP
+        run: |
+          cd ai-seo-rankmath
+          zip -r ../ai-seo-rankmath.zip . -x "*.git*" -x "*.DS_Store" -x "Thumbs.db"
+          cd ..
+
+      - name: Generate changelog for release
+        id: changelog
+        run: |
+          # Extract changelog for current version
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          CHANGELOG=$(sed -n "/## \[$VERSION\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          
+          # If no specific changelog found, use generic message
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG="Release version $VERSION"
+          fi
+          
+          # Save to file for release body
+          echo "$CHANGELOG" > release_notes.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ai-seo-rankmath.zip
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update update.json for WordPress
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          cat > update.json << EOF
+          {
+            "name": "AI SEO Assistant for Rank Math",
+            "slug": "ai-seo-rankmath",
+            "version": "$VERSION",
+            "download_url": "https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/download/v$VERSION/ai-seo-rankmath.zip",
+            "requires": "5.8",
+            "tested": "6.6",
+            "requires_php": "7.4",
+            "last_updated": "$(date -u +%Y-%m-%d)",
+            "sections": {
+              "description": "Analisa a página e preenche automaticamente os campos do Rank Math SEO usando OpenAI.",
+              "changelog": "Veja o changelog completo em https://github.com/pereira-lui/ai-seo-wp-rank-math/blob/main/CHANGELOG.md"
+            }
+          }
+          EOF
+
+      - name: Commit update.json
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git checkout main
+          git add update.json
+          git diff --staged --quiet || git commit -m "Update update.json for v${{ steps.get_version.outputs.VERSION }}"
+          git push origin main

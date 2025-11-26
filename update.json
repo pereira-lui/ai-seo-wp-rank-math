@@ -1,0 +1,25 @@
+{
+  "name": "AI SEO Assistant for Rank Math",
+  "slug": "ai-seo-rankmath",
+  "version": "2.0.0",
+  "download_url": "https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/latest/download/ai-seo-rankmath.zip",
+  "requires": "5.8",
+  "tested": "6.6",
+  "requires_php": "7.4",
+  "last_updated": "2025-11-26",
+  "author": "Lui",
+  "homepage": "https://github.com/pereira-lui/ai-seo-wp-rank-math",
+  "sections": {
+    "description": "Analisa a página (HTML renderizada) e preenche automaticamente os campos do Rank Math SEO usando OpenAI. Inclui metabox no editor, teste de chave, normalização automática da API key e preenchimento de Open Graph.",
+    "installation": "1. Baixe o ZIP\n2. WordPress → Plugins → Adicionar novo → Enviar plugin\n3. Ative o plugin\n4. Configure a API Key em Configurações → AI SEO",
+    "changelog": "Veja o changelog completo em https://github.com/pereira-lui/ai-seo-wp-rank-math/blob/main/CHANGELOG.md"
+  },
+  "banners": {
+    "low": "",
+    "high": ""
+  },
+  "icons": {
+    "1x": "",
+    "2x": ""
+  }
+}

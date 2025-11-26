@@ -1,53 +1,140 @@
-# AI SEO Assistant for Rank Math (Elementor + OpenAI)
+# AI SEO Assistant for Rank Math
 
-Analisa o **HTML renderizado** da página (ótimo para Elementor) e preenche automaticamente os campos de SEO do **Rank Math** usando **OpenAI**. Inclui metabox no editor, botão **“Analisar página e preencher”**, **teste de chave**, normalização automática da API key e preenchimento opcional de Open Graph.
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/pereira-lui/ai-seo-wp-rank-math/releases)
+[![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-green.svg)](https://wordpress.org/)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-purple.svg)](https://php.net/)
+[![License](https://img.shields.io/badge/license-GPL--2.0-orange.svg)](LICENSE)
 
-> **Compatível:** WordPress 5.8+, PHP 7.4+, Rank Math  
-> **Requer:** OpenAI API Key
+Plugin WordPress que preenche automaticamente os campos de SEO do **Rank Math** usando inteligência artificial da **OpenAI (ChatGPT)**.
 
-## Recursos
-- 🔎 **Análise do HTML final** (permalink publicado): H1/H2, contagem de palavras, links internos/externos, imagens sem ALT, `<title>`, meta description e JSON-LD.
-- 🤖 **Geração via IA (OpenAI)** com saída **100% JSON** (`response_format: json_object`) + parser robusto.
-- ✍️ **Preenche Rank Math** (title, description, focus keyword) **apenas quando vazio** – não sobrescreve sua edição manual.
-- 🧪 **Botão “Testar chave agora”** nas Configurações (detecta 401, mensagens da API, etc).
-- 🔐 **Normalização da chave**: remove espaços/aspas/ocultos e extrai o primeiro `sk-...` caso você cole um bloco maior.
-- 🧰 **Metabox** no editor com resumo técnico, sugestão da IA e relatório do que foi aplicado.
-- ⚙️ **Auto-aplicar** na publicação/atualização (opcional).
-- 🌐 **Open Graph** (Facebook/Twitter) se vazios.
+Analisa o **HTML renderizado** da página (perfeito para Elementor e page builders) e gera títulos, descrições e keywords otimizados para SEO.
 
-## Instalação
-1. Baixe o ZIP na aba **Releases**:  
-   **Download direto:** `https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/latest/download/ai-seo-rankmath.zip`
-2. WordPress → **Plugins → Adicionar novo → Enviar plugin**.
-3. Ative.
+## ✨ Recursos
 
-## Configuração
-- **Configurações → AI SEO (Rank Math)**: informe a OpenAI API Key ou defina no `wp-config.php`:
-  ```php
-  define('OPENAI_API_KEY', 'sk-...');
-  ```
-- Clique **“Testar chave agora”** para validar.
+- 🔎 **Análise do HTML final** - H1/H2, contagem de palavras, links, imagens sem ALT, JSON-LD
+- 🤖 **Geração via IA (GPT-4o-mini)** - Saída 100% JSON estruturado
+- ✍️ **Preenchimento inteligente** - Só preenche campos vazios
+- 🔄 **Atualização em tempo real** - Campos atualizados instantaneamente
+- 🎯 **Compatível** com Gutenberg e Editor Clássico
+- 🌐 **Open Graph** - Facebook/Twitter meta tags
+- ⚙️ **Auto-aplicar** na publicação (opcional)
+- 🔐 **Licenciamento** - Trial de 7 dias incluso
 
-## Como usar
-- Abra um post/página → metabox **AI SEO (Rank Math)** → **Analisar página e preencher**.
-- Marque **“Aplicar automaticamente”** para rodar na publicação/atualização.
+## 📦 Instalação
 
-## Releases automáticas
-Ao criar uma tag `v*` (ex.: `v1.0.7`), o GitHub Actions gera o ZIP automaticamente em **Releases** (workflow incluso em `.github/workflows/release.yml`).
+### Via GitHub Releases (Recomendado)
 
-## Atualizações automáticas no WordPress
-Use **uma** das opções abaixo:
+1. Baixe o ZIP: [**Download Última Versão**](https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/latest/download/ai-seo-rankmath.zip)
+2. WordPress → **Plugins → Adicionar novo → Enviar plugin**
+3. Ative o plugin
+4. Configure em **Configurações → AI SEO (Rank Math)**
 
-**A. Git Updater (simples):**
-- Instale o plugin **Git Updater (Lite)** no WordPress.  
-- Este plugin já inclui cabeçalhos:
-  ```
-  GitHub Plugin URI: pereira-lui/ai-seo-wp-rank-math
-  Primary Branch: main
-  ```
+### Via Git (Desenvolvimento)
 
-**B. (Opcional) Plugin Update Checker embutido:**
-- Inclua a lib `YahnisElsts/plugin-update-checker` e ative no `ai-seo-rankmath.php` (exemplo comentado no arquivo).
+```bash
+cd wp-content/plugins/
+git clone https://github.com/pereira-lui/ai-seo-wp-rank-math.git
+```
 
-## Licença
-GPL-2.0
+## ⚙️ Configuração
+
+### 1. Licença
+
+- Novos usuários: **7 dias de trial grátis**
+- Para uso contínuo, adquira uma licença
+- Formato: `AISEO-XXXX-XXXX-XXXX`
+
+### 2. API Key da OpenAI
+
+**Opção A:** Nas configurações do plugin
+
+**Opção B:** No `wp-config.php` (mais seguro):
+```php
+define('OPENAI_API_KEY', 'sk-...');
+```
+
+### 3. Brief de SEO (Opcional)
+
+Configure um contexto global para orientar a IA:
+> "Foco: scooters elétricas em Passo Fundo, com atendimento no Brasil inteiro."
+
+## 🚀 Como Usar
+
+1. Abra um post/página no editor
+2. Localize o metabox **AI SEO (Rank Math)** na sidebar
+3. Clique em **"Analisar página e preencher"**
+4. Os campos do Rank Math serão preenchidos automaticamente
+
+## 📋 Campos Preenchidos
+
+| Campo | Limite | Descrição |
+|-------|--------|-----------|
+| Title | 60 chars | Título otimizado para SEO |
+| Description | 160 chars | Meta descrição com CTA |
+| Focus Keyword | - | Palavra-chave principal |
+| Slug | - | URL amigável sugerida |
+| OG Title | - | Título para redes sociais |
+| OG Description | - | Descrição para redes sociais |
+
+## 🔧 Desenvolvimento
+
+### Estrutura do Projeto
+
+```
+ai-seo-wp-rank-math/
+├── .github/
+│   └── workflows/
+│       └── release.yml          # GitHub Actions para releases
+├── ai-seo-rankmath/             # Pasta do plugin
+│   ├── includes/
+│   │   └── class-license-manager.php
+│   ├── vendor/
+│   │   └── mini-puc/            # Updater para GitHub
+│   ├── admin.js                 # JavaScript do admin
+│   ├── ai-seo-rankmath.php      # Arquivo principal
+│   └── readme.txt               # Readme para WordPress.org
+├── CHANGELOG.md                 # Histórico de versões
+├── LICENSE                      # GPL-2.0
+├── README.md                    # Este arquivo
+└── update.json                  # Metadata para updates
+```
+
+### Criando uma Release
+
+1. Atualize a versão em:
+   - `ai-seo-rankmath.php` (header e constante)
+   - `readme.txt`
+   - `update.json`
+   - `CHANGELOG.md`
+
+2. Commit e push:
+```bash
+git add .
+git commit -m "Release v2.0.0"
+git push origin main
+```
+
+3. Crie a tag:
+```bash
+git tag v2.0.0
+git push origin v2.0.0
+```
+
+4. O GitHub Actions criará automaticamente o Release com o ZIP
+
+### Atualizações Automáticas
+
+O plugin verifica automaticamente novas versões no GitHub Releases e oferece atualização nativa no WordPress.
+
+## 📄 Licença
+
+GPL-2.0 - Veja [LICENSE](LICENSE) para detalhes.
+
+## 🤝 Suporte
+
+- [Issues](https://github.com/pereira-lui/ai-seo-wp-rank-math/issues)
+- [Releases](https://github.com/pereira-lui/ai-seo-wp-rank-math/releases)
+
+---
+
+**Desenvolvido por [Lui](https://github.com/pereira-lui)**
