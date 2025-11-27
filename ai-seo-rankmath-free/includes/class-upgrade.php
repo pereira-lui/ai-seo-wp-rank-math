@@ -50,9 +50,9 @@ class AI_SEO_RM_Upgrade {
             'test' => [
                 'id' => 'test',
                 'name' => '🧪 TESTE',
-                'price' => 1.00,
+                'price' => 5.00,
                 'days' => 1,
-                'description' => 'Plano de teste - 1 dia (apenas para desenvolvimento)',
+                'description' => 'Plano de teste - 1 dia (valor mínimo Asaas)',
             ],
             'monthly' => [
                 'id' => 'monthly',
