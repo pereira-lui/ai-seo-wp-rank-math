@@ -6,3 +6,6 @@ vendor/
 *.zip
 .vscode/
 .idea/
+
+# API privada (não enviar para o GitHub público)
+api/
