@@ -4,42 +4,46 @@
 
 | API | Quem Configura | Onde Configurar | Propósito |
 |-----|----------------|-----------------|-----------|
-| **Asaas** | VOCÊ (vendedor) | Hardcoded no código ou wp-config.php do seu site de vendas | Receber pagamentos dos clientes |
+| **Asaas** | VOCÊ (vendedor) | Arquivo `payment-proxy.php` no SEU servidor | Receber pagamentos dos clientes |
 | **OpenAI** | CLIENTE | Painel WordPress do cliente (Configurações → AI SEO) | Gerar conteúdo SEO com IA |
 
 ---
 
-## 🏪 Configurando SUA Chave do Asaas (Pagamentos)
+## 🔒 Sistema de Pagamento Seguro (API Proxy)
 
-Esta chave é **sua** para receber os pagamentos. Configure **antes de distribuir o plugin**.
+Sua chave do Asaas **NÃO fica no plugin**! Ela fica segura no seu servidor.
 
-### Opção 1: Hardcoded (Recomendado para segurança)
+### Passo 1: Hospede o arquivo proxy
 
-Edite o arquivo `ai-seo-rankmath-pro/includes/class-asaas-integration.php`:
+1. Pegue o arquivo `api/payment-proxy.php` deste repositório
+2. Edite e coloque sua chave do Asaas:
+   ```php
+   define('ASAAS_API_KEY', '$aact_SuaChaveAqui');
+   ```
+3. Faça upload para qualquer hospedagem PHP:
+   - Hostinger, Hostgator, Locaweb, etc.
+   - Ou até uma hospedagem gratuita como InfinityFree
+   - Exemplo: `https://seu-dominio.com/api/payment-proxy.php`
 
+### Passo 2: Configure o plugin FREE
+
+Edite `ai-seo-rankmath-free/includes/class-upgrade.php`:
 ```php
-private function get_api_key() {
-    // Substitua pela sua chave real
-    return '$aact_SuaChaveAsaasAqui';
-}
+$this->proxy_url = 'https://seu-dominio.com/api/payment-proxy.php';
 ```
 
-### Opção 2: Via wp-config.php (para seu site de vendas)
+### Por que isso é seguro?
 
-```php
-define('AI_SEO_RM_ASAAS_API_KEY', '$aact_SuaChaveAsaasAqui');
+```
+Plugin FREE (no cliente) → Seu Proxy → API Asaas
+     ↓                        ↓
+ Não tem chave          Tem a chave
+   (seguro)              (seguro)
 ```
 
-### Obter sua chave do Asaas:
-1. Acesse https://www.asaas.com
-2. Crie uma conta (se ainda não tiver)
-3. Vá em **Integrações → API**
-4. Copie sua API Key (começa com `$aact_`)
-
-### Ambiente Sandbox (Testes):
-Para testar, use o sandbox: https://sandbox.asaas.com
-- Crie conta de testes
-- Use a API Key do sandbox
+- O cliente nunca vê sua chave
+- Sua chave fica só no seu servidor
+- Você tem controle total
 
 ---
 
