@@ -48,10 +48,23 @@ class AI_SEO_RM_License_Manager {
             ? AI_SEO_RM_LICENSE_SERVER 
             : 'https://seu-servidor.com/wp-json/lmfwc/v2/';
         
+        // ================================================================
+        // CHAVES MESTRE - Sempre válidas, sem expiração
+        // Adicione suas chaves pessoais aqui
+        // ================================================================
+        $this->master_keys = [
+            'AISEO-MASTER-2024-OWNER',  // Sua chave pessoal
+            'AISEO-DEV-UNLIMITED-KEY',  // Para desenvolvimento
+            // Adicione mais chaves aqui para amigos/parceiros
+        ];
+        
         // Hooks
         add_action('admin_init', [$this, 'schedule_license_check']);
         add_action('ai_seo_rm_daily_license_check', [$this, 'daily_license_check']);
     }
+    
+    /** @var array Chaves mestre (sempre válidas) */
+    private $master_keys = [];
     
     /**
      * Agenda verificação diária de licença
@@ -205,7 +218,27 @@ class AI_SEO_RM_License_Manager {
      * Ativação local (sem servidor) - para desenvolvimento/testes
      */
     private function activate_license_local($license_key) {
-        // Valida formato básico da chave (pode personalizar)
+        // Verifica se é uma chave mestre (sempre válida, sem expiração)
+        if ($this->is_master_key($license_key)) {
+            update_option($this->license_key_option, $license_key);
+            update_option($this->license_status_option, 'active');
+            update_option($this->license_data_option, [
+                'license_key' => $license_key,
+                'status' => 'active',
+                'expires' => null, // Nunca expira
+                'activations' => 1,
+                'activations_limit' => 999,
+                'product' => 'AI SEO Assistant Pro (Master)',
+                'is_master' => true,
+            ]);
+            
+            return [
+                'success' => true,
+                'message' => __('🔑 Licença Master ativada com sucesso!', 'ai-seo-rankmath')
+            ];
+        }
+        
+        // Valida formato básico da chave
         if (strlen($license_key) < 10) {
             return [
                 'success' => false,
@@ -213,7 +246,7 @@ class AI_SEO_RM_License_Manager {
             ];
         }
         
-        // Para desenvolvimento: aceita qualquer chave com prefixo válido
+        // Aceita chaves com prefixos válidos
         $valid_prefixes = ['AISEO-', 'PRO-', 'DEV-'];
         $is_valid = false;
         
@@ -231,13 +264,25 @@ class AI_SEO_RM_License_Manager {
             ];
         }
         
+        // Verifica se é chave de tempo limitado (gerada pelo sistema de pagamento)
+        $license_data = get_option('ai_seo_rm_license_data', []);
+        $expires = null;
+        
+        // Se a chave veio do sistema de pagamento, usa a data de expiração definida
+        if (!empty($license_data['expires_at'])) {
+            $expires = $license_data['expires_at'];
+        } else {
+            // Chave manual: 1 ano de validade
+            $expires = date('Y-m-d', strtotime('+1 year'));
+        }
+        
         // Ativa a licença localmente
         update_option($this->license_key_option, $license_key);
         update_option($this->license_status_option, 'active');
         update_option($this->license_data_option, [
             'license_key' => $license_key,
             'status' => 'active',
-            'expires' => date('Y-m-d', strtotime('+1 year')),
+            'expires' => $expires,
             'activations' => 1,
             'activations_limit' => 3,
             'product' => 'AI SEO Assistant Pro'
@@ -247,6 +292,25 @@ class AI_SEO_RM_License_Manager {
             'success' => true,
             'message' => __('Licença ativada com sucesso!', 'ai-seo-rankmath')
         ];
+    }
+    
+    /**
+     * Verifica se é uma chave mestre
+     */
+    private function is_master_key($key) {
+        return in_array($key, $this->master_keys, true);
+    }
+    
+    /**
+     * Gera uma nova chave de licença (para você distribuir)
+     * Use esta função no terminal ou crie uma página admin
+     */
+    public static function generate_license_key($prefix = 'AISEO') {
+        $segments = [];
+        for ($i = 0; $i < 4; $i++) {
+            $segments[] = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
+        }
+        return $prefix . '-' . implode('-', $segments);
     }
     
     /**
