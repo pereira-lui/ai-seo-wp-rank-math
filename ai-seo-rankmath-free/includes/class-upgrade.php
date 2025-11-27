@@ -43,7 +43,7 @@ class AI_SEO_RM_Upgrade {
         // CONFIGURE A URL DO SEU PROXY AQUI
         // Exemplo: https://seu-dominio.com/api/payment-proxy.php
         // ========================================================
-        $this->proxy_url = 'https://SEU-DOMINIO.COM/api/payment-proxy.php';
+        $this->proxy_url = 'https://ai-seo-wp-rank-math.it2.solutions/api/payment-proxy.php';
         
         // Planos disponíveis (pagamento único)
         $this->plans = [
