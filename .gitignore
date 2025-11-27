@@ -9,3 +9,6 @@ vendor/
 
 # API privada (não enviar para o GitHub público)
 api/
+
+# Versão DEV (privada - sem validação de licença)
+ai-seo-rankmath-dev/
