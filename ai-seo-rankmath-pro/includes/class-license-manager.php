@@ -49,21 +49,20 @@ class AI_SEO_RM_License_Manager {
             : 'https://seu-servidor.com/wp-json/lmfwc/v2/';
         
         // ================================================================
-        // CHAVES MESTRE - Sempre válidas, sem expiração
-        // Adicione suas chaves pessoais aqui
+        // CHAVES MESTRE - Configure no wp-config.php do seu site:
+        // define('AI_SEO_RM_MASTER_KEYS', 'CHAVE1,CHAVE2,CHAVE3');
         // ================================================================
-        $this->master_keys = [
-            'AISEO-MASTER-2024-OWNER',  // Sua chave pessoal
-            'AISEO-DEV-UNLIMITED-KEY',  // Para desenvolvimento
-            // Adicione mais chaves aqui para amigos/parceiros
-        ];
+        $this->master_keys = [];
+        if (defined('AI_SEO_RM_MASTER_KEYS') && AI_SEO_RM_MASTER_KEYS) {
+            $this->master_keys = array_map('trim', explode(',', AI_SEO_RM_MASTER_KEYS));
+        }
         
         // Hooks
         add_action('admin_init', [$this, 'schedule_license_check']);
         add_action('ai_seo_rm_daily_license_check', [$this, 'daily_license_check']);
     }
     
-    /** @var array Chaves mestre (sempre válidas) */
+    /** @var array Chaves mestre (configuradas via wp-config.php) */
     private $master_keys = [];
     
     /**
