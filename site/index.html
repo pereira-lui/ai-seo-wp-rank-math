@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI SEO PRO - Automatize o SEO do WordPress com IA</title>
+    <meta name="description" content="Plugin WordPress que usa Inteligência Artificial para gerar automaticamente Title, Description e Focus Keyword otimizados para o Rank Math SEO.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="AI SEO PRO - Automatize o SEO do WordPress com IA">
+    <meta property="og:description" content="Economize horas de trabalho manual. Deixe a IA preencher o Rank Math automaticamente.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="assets/og-image.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5a6fd6;
+            --secondary: #764ba2;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --gray: #6b7280;
+            --light: #f3f4f6;
+            --white: #ffffff;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background: var(--white);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 15px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: var(--white);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .btn-white {
+            background: var(--white);
+            color: var(--primary);
+        }
+        
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .btn-large {
+            padding: 18px 40px;
+            font-size: 18px;
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 160px 0 100px;
+            background: var(--gradient);
+            color: var(--white);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .hero h1 {
+            font-size: 52px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-top: 60px;
+            flex-wrap: wrap;
+        }
+        
+        .hero-stat {
+            text-align: center;
+        }
+        
+        .hero-stat .number {
+            font-size: 42px;
+            font-weight: 800;
+        }
+        
+        .hero-stat .label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        /* Sections */
+        section {
+            padding: 100px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .section-title h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+        
+        .section-title p {
+            font-size: 18px;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Features */
+        .features {
+            background: var(--light);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 600px) {
+            .features-grid { grid-template-columns: 1fr; }
+        }
+        
+        .feature-card {
+            background: var(--white);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .feature-card p {
+            color: var(--gray);
+            font-size: 15px;
+        }
+        
+        /* How it works */
+        .how-it-works .steps {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+        
+        .step h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .step p {
+            color: var(--gray);
+        }
+        
+        /* Pricing */
+        .pricing {
+            background: var(--light);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        @media (max-width: 900px) {
+            .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+        }
+        
+        .pricing-card {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+        
+        .pricing-card.popular {
+            border: 3px solid var(--primary);
+            transform: scale(1.05);
+        }
+        
+        .pricing-card.popular:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--gradient);
+            color: var(--white);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .pricing-card h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+        
+        .pricing-card .price {
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+        
+        .pricing-card .price span {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--gray);
+        }
+        
+        .pricing-card .period {
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        
+        .pricing-features {
+            text-align: left;
+            margin-bottom: 30px;
+        }
+        
+        .pricing-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .pricing-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .pricing-features .check {
+            color: var(--success);
+        }
+        
+        /* FAQ */
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .faq-item {
+            background: var(--white);
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        
+        .faq-question {
+            padding: 20px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+        
+        .faq-question:hover {
+            background: var(--light);
+        }
+        
+        .faq-question::after {
+            content: '+';
+            font-size: 24px;
+            color: var(--primary);
+        }
+        
+        .faq-item.active .faq-question::after {
+            content: '−';
+        }
+        
+        .faq-answer {
+            padding: 0 25px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-item.active .faq-answer {
+            padding: 0 25px 20px;
+            max-height: 500px;
+        }
+        
+        .faq-answer p {
+            color: var(--gray);
+        }
+        
+        /* CTA */
+        .cta {
+            background: var(--gradient);
+            color: var(--white);
+            text-align: center;
+        }
+        
+        .cta h2 {
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+        
+        .cta p {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+        
+        .guarantee {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        /* Footer */
+        .footer {
+            background: var(--dark);
+            color: var(--white);
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-brand {
+            max-width: 300px;
+        }
+        
+        .footer-brand .logo {
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .footer-brand p {
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #9ca3af;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        
+        .footer-links a:hover {
+            color: var(--white);
+        }
+        
+        .footer-bottom {
+            border-top: 1px solid #374151;
+            padding-top: 30px;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+        
+        /* Modal Checkout */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--white);
+            border-radius: 20px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h2 {
+            font-size: 22px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--light);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        
+        .payment-method {
+            border: 2px solid var(--light);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .payment-method:hover {
+            border-color: var(--primary);
+        }
+        
+        .payment-method.selected {
+            border-color: var(--primary);
+            background: #f0f4ff;
+        }
+        
+        .payment-method .icon {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        
+        .payment-method .label {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        
+        .plan-summary {
+            background: var(--light);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+        
+        .plan-summary h4 {
+            margin-bottom: 10px;
+        }
+        
+        .plan-summary .total {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .btn-checkout {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+        }
+        
+        .pix-qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .pix-qr img {
+            max-width: 200px;
+            border: 1px solid var(--light);
+            border-radius: 12px;
+            padding: 10px;
+        }
+        
+        .pix-code {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            word-break: break-all;
+            font-size: 12px;
+            font-family: monospace;
+            margin: 15px 0;
+        }
+        
+        .license-display {
+            background: #dcfce7;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .license-display .key {
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--success);
+            background: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--white);
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 36px; }
+            .hero p { font-size: 16px; }
+            .nav-links { display: none; }
+            .section-title h2 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="#" class="logo">🚀 AI SEO PRO</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#features">Recursos</a></li>
+                    <li><a href="#pricing">Preços</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                </ul>
+            </nav>
+            <a href="#pricing" class="btn btn-primary">Comprar Agora</a>
+        </div>
+    </header>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container hero-content">
+            <h1>Automatize o SEO do WordPress<br>com Inteligência Artificial</h1>
+            <p>Economize horas de trabalho manual. O AI SEO PRO preenche automaticamente Title, Description e Focus Keyword no Rank Math usando IA.</p>
+            <div class="hero-buttons">
+                <a href="#pricing" class="btn btn-white btn-large">🚀 Começar Agora</a>
+                <a href="#features" class="btn btn-outline btn-large" style="border-color:#fff; color:#fff;">Ver Recursos</a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="number">10x</div>
+                    <div class="label">Mais rápido que manual</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">100%</div>
+                    <div class="label">Automático</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="number">GPT-4</div>
+                    <div class="label">Inteligência Artificial</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>✨ Recursos Poderosos</h2>
+                <p>Tudo que você precisa para otimizar o SEO do seu WordPress automaticamente</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Focus Keyword Automática</h3>
+                    <p>A IA analisa seu conteúdo e sugere a melhor palavra-chave para ranquear no Google.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📝</div>
+                    <h3>Title SEO Otimizado</h3>
+                    <p>Títulos persuasivos e otimizados para SEO, gerados automaticamente.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📄</div>
+                    <h3>Meta Description</h3>
+                    <p>Descrições que aumentam o CTR nos resultados de busca.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Auto-aplicar ao Publicar</h3>
+                    <p>SEO preenchido automaticamente quando você salva ou publica um post.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Open Graph</h3>
+                    <p>Otimização automática para compartilhamento no Facebook, Twitter e LinkedIn.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💡</div>
+                    <h3>Brief/Contexto</h3>
+                    <p>Personalize o comportamento da IA para seu nicho específico.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- How it works -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-title">
+                <h2>🔧 Como Funciona</h2>
+                <p>Em apenas 3 passos simples</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Instale o Plugin</h3>
+                    <p>Baixe e instale o AI SEO PRO no seu WordPress. Ative com sua licença.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Configure sua API</h3>
+                    <p>Adicione sua chave da OpenAI nas configurações. É rápido e fácil.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Publique com IA</h3>
+                    <p>Escreva seu conteúdo e deixe a IA preencher o SEO automaticamente!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing -->
+    <section class="pricing" id="pricing">
+        <div class="container">
+            <div class="section-title">
+                <h2>💰 Escolha seu Plano</h2>
+                <p>Pagamento único, sem mensalidades escondidas</p>
+            </div>
+            <div class="pricing-grid">
+                <div class="pricing-card" data-plan="monthly" data-price="29.90" data-name="30 Dias">
+                    <h3>30 Dias</h3>
+                    <div class="price">R$ 29<span>,90</span></div>
+                    <div class="period">pagamento único</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✅</span> Todas as funcionalidades</li>
+                        <li><span class="check">✅</span> 1 site WordPress</li>
+                        <li><span class="check">✅</span> Suporte por email</li>
+                        <li><span class="check">✅</span> Atualizações incluídas</li>
+                    </ul>
+                    <button class="btn btn-outline btn-buy" style="width:100%">Comprar Agora</button>
+                </div>
+                
+                <div class="pricing-card popular" data-plan="yearly" data-price="297.00" data-name="1 Ano">
+                    <span class="popular-badge">Mais Popular</span>
+                    <h3>1 Ano</h3>
+                    <div class="price">R$ 297<span>,00</span></div>
+                    <div class="period">pagamento único</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✅</span> Todas as funcionalidades</li>
+                        <li><span class="check">✅</span> 1 site WordPress</li>
+                        <li><span class="check">✅</span> Suporte prioritário</li>
+                        <li><span class="check">✅</span> Economia de 2 meses</li>
+                    </ul>
+                    <button class="btn btn-primary btn-buy" style="width:100%">Comprar Agora</button>
+                </div>
+                
+                <div class="pricing-card" data-plan="lifetime" data-price="497.00" data-name="Vitalício">
+                    <h3>Vitalício</h3>
+                    <div class="price">R$ 497<span>,00</span></div>
+                    <div class="period">pague uma vez, use para sempre</div>
+                    <ul class="pricing-features">
+                        <li><span class="check">✅</span> Todas as funcionalidades</li>
+                        <li><span class="check">✅</span> 1 site WordPress</li>
+                        <li><span class="check">✅</span> Suporte vitalício</li>
+                        <li><span class="check">✅</span> Atualizações para sempre</li>
+                    </ul>
+                    <button class="btn btn-outline btn-buy" style="width:100%">Comprar Agora</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ -->
+    <section class="faq" id="faq">
+        <div class="container">
+            <div class="section-title">
+                <h2>❓ Perguntas Frequentes</h2>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">Preciso ter uma conta na OpenAI?</div>
+                    <div class="faq-answer">
+                        <p>Sim, você precisa de uma chave de API da OpenAI. É simples de obter e você paga apenas pelo uso (geralmente centavos por post).</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Funciona com qual versão do Rank Math?</div>
+                    <div class="faq-answer">
+                        <p>O AI SEO PRO funciona com qualquer versão do Rank Math SEO (Free ou Pro). É necessário ter o Rank Math instalado e ativado.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Posso usar em mais de um site?</div>
+                    <div class="faq-answer">
+                        <p>Cada licença é válida para 1 site WordPress. Para usar em múltiplos sites, você precisa adquirir licenças adicionais.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">E se eu não gostar do plugin?</div>
+                    <div class="faq-answer">
+                        <p>Oferecemos garantia de 7 dias. Se não ficar satisfeito, basta entrar em contato que devolvemos seu dinheiro, sem perguntas.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">Como recebo o plugin após a compra?</div>
+                    <div class="faq-answer">
+                        <p>Após a confirmação do pagamento, você receberá sua chave de licença e o link para download do plugin imediatamente na tela.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <h2>🚀 Pronto para automatizar seu SEO?</h2>
+            <p>Junte-se a centenas de criadores de conteúdo que economizam tempo com IA</p>
+            <a href="#pricing" class="btn btn-white btn-large">Começar Agora</a>
+            <div class="guarantee">
+                <span>🛡️</span>
+                <span>Garantia de 7 dias • Pagamento 100% seguro</span>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="#" class="logo">🚀 AI SEO PRO</a>
+                    <p>Plugin WordPress que usa Inteligência Artificial para automatizar o SEO do Rank Math.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="#features">Recursos</a></li>
+                        <li><a href="#pricing">Preços</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Suporte</h4>
+                    <ul>
+                        <li><a href="mailto:lui.eduardo.lui@outlook.com">Contato</a></li>
+                        <li><a href="#">Documentação</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI SEO PRO. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Modal Checkout -->
+    <div class="modal" id="checkout-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🛒 Finalizar Compra</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="checkout-form">
+                    <div class="plan-summary">
+                        <h4>Plano Selecionado</h4>
+                        <div id="plan-name">-</div>
+                        <div class="total" id="plan-price">R$ 0,00</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="name">Nome Completo *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">E-mail *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cpf">CPF (opcional)</label>
+                        <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Forma de Pagamento</label>
+                        <div class="payment-methods">
+                            <div class="payment-method selected" data-method="PIX">
+                                <div class="icon">📱</div>
+                                <div class="label">PIX</div>
+                            </div>
+                            <div class="payment-method" data-method="BOLETO">
+                                <div class="icon">📄</div>
+                                <div class="label">Boleto</div>
+                            </div>
+                            <div class="payment-method" data-method="CREDIT_CARD">
+                                <div class="icon">💳</div>
+                                <div class="label">Cartão</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="plan-id" name="plan" value="">
+                    <input type="hidden" id="payment-method" name="payment_method" value="PIX">
+                    
+                    <button type="submit" class="btn btn-primary btn-checkout" id="btn-submit">
+                        💳 Pagar Agora
+                    </button>
+                </form>
+                
+                <div id="payment-result" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // FAQ Toggle
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+        
+        // Checkout Modal
+        const modal = document.getElementById('checkout-modal');
+        const checkoutForm = document.getElementById('checkout-form');
+        const paymentResult = document.getElementById('payment-result');
+        let selectedPlan = null;
+        let paymentMethod = 'PIX';
+        
+        // Abrir modal
+        document.querySelectorAll('.btn-buy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const card = btn.closest('.pricing-card');
+                selectedPlan = {
+                    id: card.dataset.plan,
+                    price: parseFloat(card.dataset.price),
+                    name: card.dataset.name
+                };
+                
+                document.getElementById('plan-name').textContent = selectedPlan.name;
+                document.getElementById('plan-price').textContent = 'R$ ' + selectedPlan.price.toFixed(2).replace('.', ',');
+                document.getElementById('plan-id').value = selectedPlan.id;
+                
+                checkoutForm.style.display = 'block';
+                paymentResult.style.display = 'none';
+                document.getElementById('btn-submit').disabled = false;
+                document.getElementById('btn-submit').innerHTML = '💳 Pagar Agora';
+                
+                modal.classList.add('active');
+            });
+        });
+        
+        // Fechar modal
+        document.querySelector('.modal-close').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('active');
+        });
+        
+        // Selecionar método de pagamento
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('selected'));
+                method.classList.add('selected');
+                paymentMethod = method.dataset.method;
+                document.getElementById('payment-method').value = paymentMethod;
+            });
+        });
+        
+        // Submit checkout
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Processando...';
+            
+            try {
+                const response = await fetch('api/payment-proxy.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'create_payment',
+                        name: document.getElementById('name').value,
+                        email: document.getElementById('email').value,
+                        cpf: document.getElementById('cpf').value,
+                        plan: selectedPlan.id,
+                        payment_method: paymentMethod
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    checkoutForm.style.display = 'none';
+                    showPaymentResult(data);
+                } else {
+                    alert('Erro: ' + (data.error || 'Tente novamente'));
+                    btn.disabled = false;
+                    btn.innerHTML = '💳 Pagar Agora';
+                }
+            } catch (err) {
+                alert('Erro de conexão. Tente novamente.');
+                btn.disabled = false;
+                btn.innerHTML = '💳 Pagar Agora';
+            }
+        });
+        
+        function showPaymentResult(data) {
+            let html = '<h3 style="color:#22c55e; text-align:center;">✅ Cobrança criada!</h3>';
+            
+            if (data.pix && data.pix.qrcode_image) {
+                html += '<p style="text-align:center;">Escaneie o QR Code ou copie o código PIX:</p>';
+                html += '<div class="pix-qr"><img src="data:image/png;base64,' + data.pix.qrcode_image + '"></div>';
+                html += '<div class="pix-code" id="pix-code">' + data.pix.payload + '</div>';
+                html += '<button class="btn btn-primary" style="width:100%;margin-bottom:20px;" onclick="copyPixCode()">📋 Copiar Código PIX</button>';
+            } else if (data.boleto_url) {
+                html += '<p style="text-align:center;">Seu boleto foi gerado:</p>';
+                html += '<a href="' + data.boleto_url + '" target="_blank" class="btn btn-primary" style="width:100%;display:block;text-align:center;margin:20px 0;">📄 Ver Boleto</a>';
+            } else if (data.invoice_url) {
+                html += '<p style="text-align:center;">Complete o pagamento:</p>';
+                html += '<a href="' + data.invoice_url + '" target="_blank" class="btn btn-primary" style="width:100%;display:block;text-align:center;margin:20px 0;">💳 Pagar Agora</a>';
+            }
+            
+            html += '<div class="license-display">';
+            html += '<p>🔑 <strong>Sua chave de licença:</strong></p>';
+            html += '<div class="key">' + data.license_key + '</div>';
+            html += '<p style="font-size:12px; color:#666; margin-top:10px;">Guarde esta chave! Será ativada após confirmação do pagamento.</p>';
+            html += '</div>';
+            
+            html += '<div id="payment-status" style="text-align:center; padding:20px; background:#f0f7fc; border-radius:12px;">⏳ Aguardando confirmação do pagamento...</div>';
+            
+            paymentResult.innerHTML = html;
+            paymentResult.style.display = 'block';
+            
+            checkPaymentStatus(data.payment_id, data.license_key);
+        }
+        
+        function copyPixCode() {
+            const code = document.getElementById('pix-code').innerText;
+            navigator.clipboard.writeText(code).then(() => {
+                alert('✅ Código PIX copiado!');
+            });
+        }
+        
+        function checkPaymentStatus(paymentId, licenseKey) {
+            let attempts = 0;
+            const maxAttempts = 360; // 30 minutos
+            
+            const interval = setInterval(async () => {
+                attempts++;
+                if (attempts >= maxAttempts) {
+                    clearInterval(interval);
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('api/payment-proxy.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'check_payment',
+                            payment_id: paymentId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success && data.is_paid) {
+                        clearInterval(interval);
+                        document.getElementById('payment-status').innerHTML = `
+                            <div style="color:#22c55e; font-size:24px; margin-bottom:15px;">🎉 Pagamento Confirmado!</div>
+                            <p>Sua licença está ativa. Baixe o plugin PRO:</p>
+                            <a href="https://github.com/pereira-lui/ai-seo-wp-rank-math/releases/latest/download/ai-seo-rankmath-pro.zip" class="btn btn-primary" style="display:inline-block; margin:15px 0;">⬇️ Download AI SEO PRO</a>
+                            <p style="font-size:13px; color:#666;">Instale o plugin e ative com a chave:<br><strong>${licenseKey}</strong></p>
+                        `;
+                    }
+                } catch (err) {
+                    console.error('Erro ao verificar status:', err);
+                }
+            }, 5000);
+        }
+        
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
