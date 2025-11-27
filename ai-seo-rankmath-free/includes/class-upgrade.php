@@ -105,8 +105,25 @@ class AI_SEO_RM_Upgrade {
         $is_configured = $this->is_configured();
         
         ?>
-        <div class="wrap">
+        <div class="wrap ai-seo-upgrade-page">
             <style>
+                /* Esconde notificações do WordPress na página de upgrade */
+                .ai-seo-upgrade-page .notice,
+                .ai-seo-upgrade-page .updated,
+                .ai-seo-upgrade-page .update-nag,
+                .ai-seo-upgrade-page .error,
+                .ai-seo-upgrade-page .notice-warning,
+                .ai-seo-upgrade-page .notice-info,
+                .ai-seo-upgrade-page .notice-error,
+                .ai-seo-upgrade-page .notice-success,
+                .wrap.ai-seo-upgrade-page ~ .notice,
+                .wrap.ai-seo-upgrade-page ~ .updated,
+                #wpbody-content > .notice,
+                #wpbody-content > .updated,
+                #wpbody-content > .update-nag,
+                #wpbody-content > .error {
+                    display: none !important;
+                }
                 .ai-seo-upgrade-wrap { max-width: 900px; margin: 20px auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
                 .ai-seo-header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 12px; margin-bottom: 30px; }
                 .ai-seo-header h1 { margin: 0 0 10px 0; font-size: 32px; color: #fff; }
