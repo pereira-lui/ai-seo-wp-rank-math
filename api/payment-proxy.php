@@ -1,12 +1,14 @@
 <?php
 /**
- * API Proxy para pagamentos do AI SEO PRO
+ * API Proxy para pagamentos e licenças do AI SEO PRO
  * 
- * HOSPEDE ESTE ARQUIVO EM QUALQUER SERVIDOR PHP
+ * HOSPEDE ESTE ARQUIVO NO MESMO DIRETÓRIO DO license-admin.php
  * Exemplo: https://seu-dominio.com/api/payment-proxy.php
- * 
- * Depois configure a URL no plugin.
  */
+
+// ================================================================
+// CONFIGURAÇÕES - EDITE AQUI
+// ================================================================
 
 // Sua chave do Asaas (MANTENHA SEGURA AQUI)
 define('ASAAS_API_KEY', '$aact_COLOQUE_SUA_CHAVE_AQUI');
@@ -14,14 +16,21 @@ define('ASAAS_API_KEY', '$aact_COLOQUE_SUA_CHAVE_AQUI');
 // Modo sandbox (true para testes, false para produção)
 define('ASAAS_SANDBOX', false);
 
-// Domínios permitidos (adicione os domínios dos seus clientes ou deixe vazio para todos)
-$allowed_origins = [
-    // '*', // Permite todos (menos seguro, mas funciona para qualquer cliente)
-];
+// Arquivo de licenças (mesmo do license-admin.php)
+define('LICENSES_FILE', __DIR__ . '/licenses.json');
 
-// ============================================================
+// Domínios permitidos (deixe vazio para permitir todos)
+$allowed_origins = [];
+
+// Chaves mestra (para você e amigos - funcionam para sempre)
+define('MASTER_KEYS', [
+    // Adicione suas chaves mestra aqui:
+    // 'MASTER-XXXX-XXXX-XXXX-XXXX',
+]);
+
+// ================================================================
 // NÃO MODIFIQUE ABAIXO DESTA LINHA
-// ============================================================
+// ================================================================
 
 header('Content-Type: application/json');
 
@@ -49,6 +58,24 @@ $action = $input['action'] ?? '';
 $api_url = ASAAS_SANDBOX 
     ? 'https://sandbox.asaas.com/api/v3/'
     : 'https://api.asaas.com/v3/';
+
+/**
+ * Carrega licenças do arquivo
+ */
+function load_licenses() {
+    if (!file_exists(LICENSES_FILE)) {
+        return [];
+    }
+    $data = json_decode(file_get_contents(LICENSES_FILE), true);
+    return $data ?: [];
+}
+
+/**
+ * Salva licenças no arquivo
+ */
+function save_licenses($licenses) {
+    file_put_contents(LICENSES_FILE, json_encode($licenses, JSON_PRETTY_PRINT));
+}
 
 /**
  * Faz requisição à API do Asaas
@@ -88,16 +115,81 @@ function asaas_request($endpoint, $method = 'GET', $data = null) {
 /**
  * Gera chave de licença
  */
-function generate_license_key() {
+function generate_license_key($prefix = 'AISEO') {
     $segments = [];
     for ($i = 0; $i < 4; $i++) {
         $segments[] = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4));
     }
-    return 'AISEO-' . implode('-', $segments);
+    return $prefix . '-' . implode('-', $segments);
 }
 
 // Processa ações
 switch ($action) {
+    
+    // ============================================================
+    // VALIDAR LICENÇA (chamado pelo plugin)
+    // ============================================================
+    case 'validate_license':
+        $license_key = trim($input['license_key'] ?? '');
+        $site_url = $input['site_url'] ?? '';
+        
+        if (!$license_key) {
+            echo json_encode(['success' => false, 'error' => 'Chave não informada']);
+            exit;
+        }
+        
+        // Verifica se é chave mestra
+        if (in_array($license_key, MASTER_KEYS)) {
+            echo json_encode([
+                'success' => true,
+                'valid' => true,
+                'type' => 'master',
+                'expires' => null,
+                'plan' => 'Vitalício (Master)',
+            ]);
+            exit;
+        }
+        
+        // Busca no arquivo de licenças
+        $licenses = load_licenses();
+        
+        foreach ($licenses as $lic) {
+            if ($lic['license_key'] === $license_key && $lic['status'] === 'active') {
+                // Verifica expiração
+                if ($lic['expires_at'] !== null && strtotime($lic['expires_at']) < time()) {
+                    echo json_encode([
+                        'success' => true,
+                        'valid' => false,
+                        'error' => 'Licença expirada',
+                        'expired_at' => $lic['expires_at'],
+                    ]);
+                    exit;
+                }
+                
+                // Licença válida
+                echo json_encode([
+                    'success' => true,
+                    'valid' => true,
+                    'type' => $lic['type'],
+                    'plan' => $lic['plan'] ?? 'PRO',
+                    'expires' => $lic['expires_at'],
+                    'customer_name' => $lic['customer_name'] ?? '',
+                ]);
+                exit;
+            }
+        }
+        
+        // Licença não encontrada
+        echo json_encode([
+            'success' => true,
+            'valid' => false,
+            'error' => 'Licença não encontrada ou inativa',
+        ]);
+        break;
+    
+    // ============================================================
+    // CRIAR PAGAMENTO
+    // ============================================================
     case 'create_payment':
         $name = $input['name'] ?? '';
         $email = $input['email'] ?? '';
@@ -110,7 +202,7 @@ switch ($action) {
             exit;
         }
         
-        // Planos
+        // Planos (pagamento único)
         $plans = [
             'monthly' => ['name' => '30 Dias', 'price' => 29.90, 'days' => 30],
             'yearly' => ['name' => '1 Ano', 'price' => 297.00, 'days' => 365],
@@ -143,9 +235,9 @@ switch ($action) {
         }
         
         // Gera licença
-        $license_key = generate_license_key();
+        $license_key = generate_license_key('AISEO');
         
-        // Cria cobrança
+        // Cria cobrança (pagamento único)
         $payment_data = [
             'customer' => $customer['id'],
             'billingType' => $payment_method,
@@ -155,8 +247,10 @@ switch ($action) {
             'externalReference' => json_encode([
                 'license_key' => $license_key,
                 'plan_id' => $plan_id,
+                'plan_name' => $plan['name'],
                 'days' => $plan['days'],
                 'email' => $email,
+                'name' => $name,
             ]),
         ];
         
@@ -166,6 +260,24 @@ switch ($action) {
             echo json_encode(['success' => false, 'error' => $payment['data']['errors'][0]['description'] ?? 'Erro ao criar cobrança']);
             exit;
         }
+        
+        // Salva licença como pendente
+        $licenses = load_licenses();
+        $licenses[] = [
+            'license_key' => $license_key,
+            'customer_name' => $name,
+            'customer_email' => $email,
+            'plan' => $plan['name'],
+            'plan_id' => $plan_id,
+            'type' => 'payment',
+            'status' => 'pending',
+            'payment_id' => $payment['data']['id'],
+            'created_at' => date('Y-m-d H:i:s'),
+            'activated_at' => null,
+            'expires_at' => null,
+            'days' => $plan['days'],
+        ];
+        save_licenses($licenses);
         
         $response = [
             'success' => true,
@@ -194,7 +306,10 @@ switch ($action) {
         
         echo json_encode($response);
         break;
-        
+    
+    // ============================================================
+    // VERIFICAR STATUS DO PAGAMENTO
+    // ============================================================
     case 'check_payment':
         $payment_id = $input['payment_id'] ?? '';
         
@@ -207,6 +322,25 @@ switch ($action) {
         
         if ($result['success']) {
             $is_paid = in_array($result['data']['status'], ['CONFIRMED', 'RECEIVED']);
+            
+            // Se pago, ativa a licença
+            if ($is_paid) {
+                $licenses = load_licenses();
+                foreach ($licenses as &$lic) {
+                    if (isset($lic['payment_id']) && $lic['payment_id'] === $payment_id && $lic['status'] === 'pending') {
+                        $lic['status'] = 'active';
+                        $lic['activated_at'] = date('Y-m-d H:i:s');
+                        if ($lic['days'] > 0) {
+                            $lic['expires_at'] = date('Y-m-d H:i:s', strtotime('+' . $lic['days'] . ' days'));
+                        } else {
+                            $lic['expires_at'] = null; // Vitalício
+                        }
+                        break;
+                    }
+                }
+                save_licenses($licenses);
+            }
+            
             echo json_encode([
                 'success' => true,
                 'status' => $result['data']['status'],
@@ -215,6 +349,41 @@ switch ($action) {
         } else {
             echo json_encode(['success' => false, 'error' => 'Erro ao verificar']);
         }
+        break;
+    
+    // ============================================================
+    // WEBHOOK DO ASAAS
+    // ============================================================
+    case 'webhook':
+        $event = $input['event'] ?? '';
+        $payment = $input['payment'] ?? [];
+        
+        // Log do webhook
+        file_put_contents(__DIR__ . '/webhook.log', date('Y-m-d H:i:s') . ' - ' . json_encode($input) . "\n", FILE_APPEND);
+        
+        if ($event === 'PAYMENT_CONFIRMED' || $event === 'PAYMENT_RECEIVED') {
+            $payment_id = $payment['id'] ?? '';
+            $external_ref = json_decode($payment['externalReference'] ?? '{}', true);
+            
+            if ($payment_id) {
+                $licenses = load_licenses();
+                foreach ($licenses as &$lic) {
+                    if (isset($lic['payment_id']) && $lic['payment_id'] === $payment_id && $lic['status'] === 'pending') {
+                        $lic['status'] = 'active';
+                        $lic['activated_at'] = date('Y-m-d H:i:s');
+                        if ($lic['days'] > 0) {
+                            $lic['expires_at'] = date('Y-m-d H:i:s', strtotime('+' . $lic['days'] . ' days'));
+                        } else {
+                            $lic['expires_at'] = null;
+                        }
+                        break;
+                    }
+                }
+                save_licenses($licenses);
+            }
+        }
+        
+        echo json_encode(['success' => true]);
         break;
         
     default:
