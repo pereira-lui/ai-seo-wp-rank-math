@@ -47,6 +47,13 @@ class AI_SEO_RM_Upgrade {
         
         // Planos disponíveis (pagamento único)
         $this->plans = [
+            'test' => [
+                'id' => 'test',
+                'name' => '🧪 TESTE',
+                'price' => 1.00,
+                'days' => 1,
+                'description' => 'Plano de teste - 1 dia (apenas para desenvolvimento)',
+            ],
             'monthly' => [
                 'id' => 'monthly',
                 'name' => '30 Dias',
@@ -128,7 +135,7 @@ class AI_SEO_RM_Upgrade {
                 .ai-seo-header { text-align: center; padding: 40px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border-radius: 12px; margin-bottom: 30px; }
                 .ai-seo-header h1 { margin: 0 0 10px 0; font-size: 32px; color: #fff; }
                 .ai-seo-header p { margin: 0; font-size: 18px; opacity: 0.9; }
-                .ai-seo-plans { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+                .ai-seo-plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
                 @media (max-width: 768px) { .ai-seo-plans { grid-template-columns: 1fr; } }
                 .ai-seo-plan { background: #fff; border: 2px solid #e0e0e0; border-radius: 12px; padding: 25px; text-align: center; position: relative; transition: all 0.3s ease; }
                 .ai-seo-plan:hover { border-color: #667eea; box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2); }
